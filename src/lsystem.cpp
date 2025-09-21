@@ -22,7 +22,17 @@ lsystem::ruleset lsystem::parse_rules(std::istream& rules) {
 }
 
 std::string lsystem::iterate(const std::string &seed, const ruleset &rules, int count) {
-	if (count <= 0) return seed;
-	std::cout << "TODO! iterate\n";
-	return seed;
+	std::string cur = seed;
+	std::stringstream res{};
+	for (int i = 0; i < count; i++) {
+		for (const auto& c : cur) {
+			if (rules.find(c) != rules.end()) {
+				res << rules.at(c);
+			} else {
+				res << c;
+			}
+		}
+		cur = res.str();
+	}
+	return cur;
 }
