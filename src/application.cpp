@@ -16,6 +16,7 @@
 #include "cgra/cgra_shader.hpp"
 #include "cgra/cgra_wavefront.hpp"
 
+#include "lsystem.hpp"
 
 using namespace std;
 using namespace cgra;
@@ -116,6 +117,12 @@ void Application::renderGUI() {
 
 	// finish creating window
 	ImGui::End();
+
+	// {{{ LSystem stuff
+	static lsystem::gui::Data ls_data;
+	lsystem::gui::rules_window(ls_data);
+	// lsystem::gui::growthWindow(ls_data);
+	// }}}
 }
 
 
