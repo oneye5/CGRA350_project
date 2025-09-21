@@ -12,10 +12,12 @@ namespace lsystem {
 		static const char* available_rule_names[] = {
 			"",
 			"Basic Tree",
+			"Debug",
 		};
 		static const char* available_rule_paths[] = {
 			"",
 			CGRA_SRCDIR "/res/rules/basic_tree.txt",
+			CGRA_SRCDIR "/res/rules/debug.txt",
 		};
 		struct Data {
 			std::string seed;
