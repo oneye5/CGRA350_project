@@ -25,6 +25,7 @@ using namespace glm;
 
 Renderer* renderer = nullptr;
 ExampleRenderable* exampleRenderable = nullptr;
+ExampleRenderable* exampleRenderable2 = nullptr;
 
 Application::Application(GLFWwindow *window) : m_window(window) {
 	int width, height;
@@ -33,7 +34,10 @@ Application::Application(GLFWwindow *window) : m_window(window) {
 
 	// add all renderables
 	exampleRenderable = new ExampleRenderable();
+	exampleRenderable2 = new ExampleRenderable();
+	exampleRenderable2->modelTransform = glm::translate(glm::mat4(1), glm::vec3(5)); // second model in a different place
 	renderer->addRenderable(exampleRenderable);
+	renderer->addRenderable(exampleRenderable2);
 }
 
 
