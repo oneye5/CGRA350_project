@@ -4,6 +4,15 @@
 #include <vct/gBufferLightingPass.hpp>
 #include <vct/voxelizer.hpp>
 
+struct debug_params {
+    bool voxel_debug_mode_on;
+    float voxel_slice;
+
+    int debug_channel_index; // shared
+
+    bool gbuffer_debug_mode_on;
+};
+
 class Renderer {
 public:
     gBufferPrepass* prepass;
