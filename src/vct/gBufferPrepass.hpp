@@ -21,16 +21,16 @@ public:
         glDeleteRenderbuffers(1, &depthRBO);
     }
 
-    void executePrepass(GLuint shader,
-        std::function<void()> drawScene) {
+    void executePrepass(std::vector<GLuint> shaders, std::function<void()> drawScene) {
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
         glViewport(0, 0, width, height);
 
         // Clear g buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glUseProgram(shader);
-        glUniform1i(glGetUniformLocation(shader, "uRenderMode"), 1); // set to draw to gbuffer
+        for (auto shader : shaders) {
+            glUseProgram(shader);
+            glUniform1i(glGetUniformLocation(shader, "uRenderMode"), 1); // set to draw to gbuffer
+        }
         drawScene(); // user-supplied function that draws geometry
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -42,6 +42,11 @@ public:
     }
 
     GLuint getFBO() const { return fbo; }
+
+    void resize(int w, int h) {
+        width = w;
+        height = h;
+    }
 
 private:
     GLuint fbo = 0;

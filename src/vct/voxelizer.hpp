@@ -17,8 +17,9 @@ public:
 
     Voxelizer(int resolution = 512);
     ~Voxelizer();
+
     // Main interface 
-    void voxelize(std::function<void()> drawMainGeometry, const  glm::mat4& modelTransform, const GLuint usingShader);
+    void voxelize(std::function<void()> drawMainGeometry, std::vector<glm::mat4> modelTransforms, std::vector<GLuint> shaders);
     void renderDebugSlice(float sliceValue, int debugMode = 0);
     void clearVoxelTexture(); 
 
@@ -35,7 +36,7 @@ private:
     // Voxelization steps
     void setupVoxelizationState();
     void restoreRenderingState(int width, int height);
-    void performVoxelization(std::function<void()> drawMainGeometry, const glm::mat4& modelTransform, const GLuint usingShader);
+    void performVoxelization(std::function<void()> drawMainGeometry, std::vector<glm::mat4> modelTransforms, std::vector<GLuint> usingShaders);
 
     // Helper methods
     glm::mat4 createOrthographicProjection() const;

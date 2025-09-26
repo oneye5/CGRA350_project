@@ -113,7 +113,7 @@ void Voxelizer::initializeQuad() {
     glBindVertexArray(0);
 }
 
-void Voxelizer::voxelize(std::function<void()> drawMainGeometry, const mat4& modelTransform, const GLuint usingShader) {
+void Voxelizer::voxelize(std::function<void()> drawMainGeometry, std::vector<glm::mat4> modelTransforms, std::vector<GLuint> shaders) {
     if (!m_initialized) {
         std::cerr << "Voxelizer not properly initialized!" << std::endl;
         return;
@@ -126,7 +126,7 @@ void Voxelizer::voxelize(std::function<void()> drawMainGeometry, const mat4& mod
     m_currentViewportHeight = viewport[3];
 
     setupVoxelizationState();
-    performVoxelization(drawMainGeometry, modelTransform, usingShader);
+    performVoxelization(drawMainGeometry, modelTransforms, shaders);
     restoreRenderingState(m_currentViewportWidth, m_currentViewportHeight);
 
     // Memory barrier to ensure writes are complete
@@ -168,23 +168,35 @@ void Voxelizer::restoreRenderingState(int width, int height) {
     glViewport(0, 0, width, height);
 }
 
-void Voxelizer::performVoxelization(std::function<void()> drawMainGeometry, const glm::mat4& modelTransform, const GLuint usingShader) {
+void Voxelizer::performVoxelization(std::function<void()> drawMainGeometry, std::vector<glm::mat4> modelTransforms, std::vector<GLuint> usingShaders) {
     // Set common uniforms
     mat4 orthoProj = createOrthographicProjection();
     auto views = createOrthographicViews();
 
-    glUniformMatrix4fv(glGetUniformLocation(usingShader, "uModelMatrix"), 1, GL_FALSE, value_ptr(modelTransform));
-    glUniformMatrix4fv(glGetUniformLocation(usingShader, "uProjectionMatrix"), 1, GL_FALSE, value_ptr(orthoProj));
-    glUniform1i(glGetUniformLocation(usingShader, "uVoxelRes"), m_params.resolution);
-    glUniform1f(glGetUniformLocation(usingShader, "uVoxelWorldSize"), m_params.worldSize);
-    glUniform1i(glGetUniformLocation(usingShader, "uRenderMode"), 0); // voxelize mode
+    for (int i = 0; i < usingShaders.size(); i++) { // set uniforms for all shaders
+        auto shader = usingShaders[i];
+        auto modelTransform = modelTransforms[i];
+
+        glUseProgram(shader);
+        glUniformMatrix4fv(glGetUniformLocation(shader, "uModelMatrix"), 1, GL_FALSE, value_ptr(modelTransform));
+        glUniformMatrix4fv(glGetUniformLocation(shader, "uProjectionMatrix"), 1, GL_FALSE, value_ptr(orthoProj));
+        glUniform1i(glGetUniformLocation(shader, "uVoxelRes"), m_params.resolution);
+        glUniform1f(glGetUniformLocation(shader, "uVoxelWorldSize"), m_params.worldSize);
+        glUniform1i(glGetUniformLocation(shader, "uRenderMode"), 0); // voxelize mode
+    }
 
     // Render from three orthogonal directions
-    const char* axisNames[] = { "X", "Y", "Z" };
     for (int i = 0; i < 3; ++i) {
-        glm::mat4 modelView = views[i] * modelTransform;
-        glUniformMatrix4fv(glGetUniformLocation(usingShader, "uModelViewMatrix"), 1, GL_FALSE, value_ptr(views[i]));
-        glUniformMatrix4fv(glGetUniformLocation(usingShader, "uViewMatrix"), 1, GL_FALSE, value_ptr(modelView));
+        for (int ii = 0; ii < usingShaders.size(); ii++) { // set uniforms for all shaders
+            auto shader = usingShaders[ii];
+            auto modelTransform = modelTransforms[ii];
+            glm::mat4 modelView = views[i] * modelTransform;
+
+            glUseProgram(shader);
+            glUniformMatrix4fv(glGetUniformLocation(shader, "uModelViewMatrix"), 1, GL_FALSE, value_ptr(views[i]));
+            glUniformMatrix4fv(glGetUniformLocation(shader, "uViewMatrix"), 1, GL_FALSE, value_ptr(modelView));
+        }
+      
         drawMainGeometry();
     }
 }
