@@ -1,4 +1,3 @@
-// TeapotRenderable.hpp
 #pragma once
 #include "Renderable.hpp"
 #include "cgra/cgra_wavefront.hpp"
@@ -25,7 +24,7 @@ public:
 
     GLuint getShader() override { return shader; }
 
-    void setProjViewUniforms(const glm::mat4& view, const glm::mat4& proj) override {
+    void setProjViewUniforms(const glm::mat4& view, const glm::mat4& proj) const override {
         glUseProgram(shader);
 
         glm::mat4 modelview = view * modelTransform;
@@ -51,4 +50,5 @@ public:
 
     GLuint shader;
     cgra::gl_mesh mesh;
+
 };
