@@ -119,6 +119,8 @@ void Voxelizer::voxelize(std::function<void()> drawMainGeometry, std::vector<glm
         return;
     }
 
+    clearVoxelTexture();
+
     // Store current viewport
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
@@ -232,7 +234,6 @@ void Voxelizer::renderDebugSlice(float sliceValue, int debugMode) {
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_3D, m_voxelTex2);
 
-    glUniform1i(glGetUniformLocation(m_debugShader, "uVoxelTex"), 0);
     glUniform1f(glGetUniformLocation(m_debugShader, "uSlice"), sliceValue);
 
     glBindVertexArray(m_quadVAO);

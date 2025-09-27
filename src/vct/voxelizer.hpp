@@ -42,14 +42,12 @@ private:
     glm::mat4 createOrthographicProjection() const;
     std::array<glm::mat4, 3> createOrthographicViews() const;
 
-private:
-    VoxelParams m_params;
-
     // OpenGL resources
     GLuint m_voxelTex0; // normal + smoothness
     GLuint m_voxelTex1; // albedo + emissiveFactor
     GLuint m_voxelTex2; // emissive + metallic
-
+    VoxelParams m_params;
+private:
     GLuint m_voxelShader;
     GLuint m_debugShader;
     GLuint m_quadVAO;
