@@ -32,7 +32,7 @@ void writeRenderInfo(MaterialData m) {
         ivec3 texCoord = ivec3(vpos * float(uVoxelRes - 1));
 
         imageStore(voxelTex0, texCoord, vec4(vpos, m.mtl));
-        imageStore(voxelTex1, texCoord, vec4(normalize(m.nrm) * 0.5 + 0.5, m.smoothness));
+        imageStore(voxelTex1, texCoord, vec4(normalize(m.nrm), m.smoothness));
         imageStore(voxelTex2, texCoord, vec4(m.alb, m.emiFac));
     }
     else { // gbuffer

@@ -18,8 +18,7 @@ public:
 	gBufferLightingPass(gBufferPrepass* prepassObj, Voxelizer* voxelizerObj) {
 		prepass = prepassObj;
 		voxelizer = voxelizerObj;
-		//debugModePtr = &prepassObj->debugMode;
-		// setup shaders
+
 		cgra::shader_builder sb;
 		sb.set_shader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//fullscreen_quad_vert.glsl"));
 		sb.set_shader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//lighting_pass_frag.glsl"));
