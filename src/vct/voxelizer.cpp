@@ -60,6 +60,8 @@ Voxelizer::~Voxelizer() {
 }
 
 void Voxelizer::initializeTextures() {
+
+
     auto make3DTex = [&](GLuint& tex) {
         glGenTextures(1, &tex);
         glBindTexture(GL_TEXTURE_3D, tex);
@@ -68,6 +70,10 @@ void Voxelizer::initializeTextures() {
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_BASE_LEVEL, 0);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_LEVEL, 0);
         glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA8,
             m_params.resolution, m_params.resolution, m_params.resolution,
             0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
@@ -154,7 +160,7 @@ void Voxelizer::clearVoxelTexture() {
 }
 
 void Voxelizer::setupVoxelizationState() {
-    // glUseProgram(m_voxelShader); not needed
+   
     glViewport(0, 0, m_params.resolution, m_params.resolution);
 
     // Bind voxel texture for writing

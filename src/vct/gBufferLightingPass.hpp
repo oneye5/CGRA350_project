@@ -30,7 +30,7 @@ public:
 		glUseProgram(shader);
 		glUniform1i(glGetUniformLocation(shader, "voxelTex0"), 4);
 		glUniform1i(glGetUniformLocation(shader, "voxelTex1"), 5);
-		glUniform1i(glGetUniformLocation(shader, "voxelTex2"), 2);
+		glUniform1i(glGetUniformLocation(shader, "voxelTex2"), 6);
 	}
 
 	~gBufferLightingPass() {
