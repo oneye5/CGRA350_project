@@ -4,22 +4,23 @@
 #include "cgra/cgra_shader.hpp"
 #include <glm/gtc/type_ptr.hpp>
 #include "cgra/cgra_mesh.hpp"
+#include <glm/gtc/matrix_transform.hpp>
 
-class ExampleRenderable : public Renderable {
+class PointLightRenderable : public Renderable {
 public:
-    ExampleRenderable() {
+    PointLightRenderable() {
         // Build shader
         cgra::shader_builder sb;
         sb.set_shader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//example_vct_compatible_vert.glsl"));
-        sb.set_shader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//example_vct_compatible_frag.glsl"));
+        sb.set_shader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//point_light_frag.glsl"));
         shader = sb.build();
 
         // Load mesh
-        mesh = cgra::load_wavefront_data(CGRA_SRCDIR + std::string("//res//assets//teapot.obj")).build();
+        mesh = cgra::load_wavefront_data(CGRA_SRCDIR + std::string("//res//assets//teapot.obj")).build(); // temp, use sphere later
 
         // Default transform & color
         modelTransform = glm::mat4(1.0f);
-        color = glm::vec3(1, 0, 0);
+        lightColor = glm::vec3(1, 1, 1);
     }
 
     GLuint getShader() override { return shader; }
@@ -37,7 +38,7 @@ public:
 
     void draw() override {
         glUseProgram(shader);
-        glUniform3fv(glGetUniformLocation(shader, "uColor"), 1, glm::value_ptr(color)); // this isnt actually used in the shader, its just an example
+        glUniform3fv(glGetUniformLocation(shader, "uLightColor"),1 ,glm::value_ptr((lightColor *brightness)));
         mesh.draw();
     }
 
@@ -46,8 +47,8 @@ public:
     }
 
     glm::mat4 modelTransform;
-    glm::vec3 color;
-
+    glm::vec3 lightColor = glm::vec3(1);
+    float brightness = 1;
     GLuint shader;
     cgra::gl_mesh mesh;
 

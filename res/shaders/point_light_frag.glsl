@@ -13,6 +13,9 @@ layout(location = 1) out vec4 gNormal;   // world normal.xyz + smoothness
 layout(location = 2) out vec4 gAlbedo;   // albedo.rgb + emissiveFactor
 layout(location = 3) out vec4 gEmissive; // emissive.rgb + spare channel
 
+// additional uniforms
+uniform vec3 uLightColor;
+
 in vec3 worldPos;
 in vec3 normal;
 out vec4 fragColor;
@@ -39,16 +42,15 @@ void writeRenderInfo(MaterialData m) {
         gEmissive = vec4(m.emi * m.emiFac, 0); // 
     }
 }
-
 void main() {
     MaterialData m;
     m.pos = worldPos;
     m.nrm = normal;
-    m.alb = vec3(1,1,0);
-    m.emi = vec3(0.0);
-    m.mtl = 0.5;
-    m.smoothness = 0.5;
-    m.emiFac = 0.0;
+    m.alb = vec3(1,1,1);
+    m.emi = vec3(uLightColor);
+    m.mtl = 0.0;
+    m.smoothness = 0.0;
+    m.emiFac = 1;
 
     writeRenderInfo(m);
     fragColor = vec4(1); // Optional debug color

@@ -28,8 +28,8 @@ public:
 		setupQuad();
 
 		glUseProgram(shader);
-		glUniform1i(glGetUniformLocation(shader, "voxelTex0"), 0);
-		glUniform1i(glGetUniformLocation(shader, "voxelTex1"), 1);
+		glUniform1i(glGetUniformLocation(shader, "voxelTex0"), 4);
+		glUniform1i(glGetUniformLocation(shader, "voxelTex1"), 5);
 		glUniform1i(glGetUniformLocation(shader, "voxelTex2"), 2);
 	}
 
@@ -78,11 +78,11 @@ public:
 		glUniform1i(glGetUniformLocation(shader, "uVoxelRes"), voxelizer->m_params.resolution);
 		glUniform1f(glGetUniformLocation(shader, "uVoxelWorldSize"), voxelizer->m_params.worldSize);
 
-		glActiveTexture(GL_TEXTURE0);
+		glActiveTexture(GL_TEXTURE4);
 		glBindTexture(GL_TEXTURE_3D, voxelizer->m_voxelTex0);
-		glActiveTexture(GL_TEXTURE1);
+		glActiveTexture(GL_TEXTURE5);
 		glBindTexture(GL_TEXTURE_3D, voxelizer->m_voxelTex1);
-		glActiveTexture(GL_TEXTURE2);
+		glActiveTexture(GL_TEXTURE6);
 		glBindTexture(GL_TEXTURE_3D, voxelizer->m_voxelTex2); // no uniform setting needed, already done in constructor
 
 		// Draw fullscreen quad

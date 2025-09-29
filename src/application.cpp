@@ -17,6 +17,7 @@
 #include "cgra/cgra_wavefront.hpp"
 #include <renderer.hpp>
 #include <example_renderable.cpp>
+#include <point_light_renderable.cpp>
 
 
 using namespace std;
@@ -24,8 +25,9 @@ using namespace cgra;
 using namespace glm;
 
 Renderer* renderer = nullptr;
-ExampleRenderable* exampleRenderable = nullptr;
-ExampleRenderable* exampleRenderable2 = nullptr;
+
+ExampleRenderable* exampleRenderable  = nullptr;
+PointLightRenderable* light = nullptr;
 
 Application::Application(GLFWwindow *window) : m_window(window) {
 	int width, height;
@@ -33,11 +35,13 @@ Application::Application(GLFWwindow *window) : m_window(window) {
 	renderer = new Renderer(width, height);
 
 	// add all renderables
-	exampleRenderable = new ExampleRenderable();
-	exampleRenderable2 = new ExampleRenderable();
-	exampleRenderable2->modelTransform = glm::translate(glm::mat4(1), glm::vec3(5)); // second model in a different place
+	exampleRenderable = new ExampleRenderable{};
+	light = new PointLightRenderable();
+	light->modelTransform = glm::translate(glm::mat4(1), glm::vec3(0,10,0));
+	light->modelTransform = glm::scale(light->modelTransform, vec3(0.4));
+
 	renderer->addRenderable(exampleRenderable);
-	renderer->addRenderable(exampleRenderable2);
+	renderer->addRenderable(light);
 }
 
 
