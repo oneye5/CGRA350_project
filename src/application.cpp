@@ -37,7 +37,7 @@ Application::Application(GLFWwindow *window) : m_window(window) {
 	// add all renderables
 	exampleRenderable = new ExampleRenderable{};
 	light = new PointLightRenderable();
-	light->modelTransform = glm::translate(glm::mat4(1), glm::vec3(0,10,0));
+	light->modelTransform = glm::translate(glm::mat4(1), glm::vec3(2,10,2));
 	light->modelTransform = glm::scale(light->modelTransform, vec3(1));
 
 	renderer->addRenderable(exampleRenderable);
