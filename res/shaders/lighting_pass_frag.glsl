@@ -29,13 +29,11 @@ int debugPass(vec3 worldPos, float metallic, vec3 worldNormal, float smoothness,
     return 1;
 }
 
-// Convert world position to voxel UVW [0,1]
 vec3 worldToVoxel(vec3 pos) {
     return (pos / uVoxelWorldSize) + 0.5;
 }
 
 void main() {
-    // unpack channels
     vec3 worldPos = texture(gBufferPosition, texCoord).xyz;
     float metallic = texture(gBufferPosition, texCoord).w;
     vec3 worldNormal = texture(gBufferNormal, texCoord).xyz;
@@ -44,19 +42,11 @@ void main() {
     float emissiveFactor = texture(gBufferAlbedo, texCoord).w;
     vec3 emissiveRgb = texture(gBufferEmissive, texCoord).xyz;
     float spare = texture(gBufferEmissive, texCoord).w;
-
+    
     if (debugPass(worldPos, metallic, worldNormal, smoothness, albedo, emissiveFactor, emissiveRgb, spare) == 1)
         return;
-
-
-    vec3 outColor = vec3(1);
-    outColor = texture(voxelTex2, worldToVoxel(worldPos)).xyz;
-    if (outColor != vec3(0))
-    {
-        FragColor = vec4(outColor, 1.0);
-    }
-    else
-    {
-        FragColor = vec4(1, 1, 1, 1);
-    }
+    
+    
+    //vec3 outColor = textureLod(voxelTex2, worldToVoxel(worldPos), 0).xyz;
+    FragColor = vec4(albedo, 1.0);
 }

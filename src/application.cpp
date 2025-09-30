@@ -38,13 +38,13 @@ Application::Application(GLFWwindow *window) : m_window(window) {
 	exampleRenderable = new ExampleRenderable{};
 	light = new PointLightRenderable();
 	light->modelTransform = glm::translate(glm::mat4(1), glm::vec3(0,10,0));
-	light->modelTransform = glm::scale(light->modelTransform, vec3(0.4));
+	light->modelTransform = glm::scale(light->modelTransform, vec3(1));
 
 	renderer->addRenderable(exampleRenderable);
 	renderer->addRenderable(light);
 }
 
-
+bool dirtyVoxels = true;
 void Application::render() {
 	int width, height;
 	glfwGetFramebufferSize(m_window, &width, &height);  
@@ -76,7 +76,13 @@ void Application::render() {
 	if (m_show_grid) drawGrid(view, proj);
 	if (m_show_axis) drawAxis(view, proj);
 	glPolygonMode(GL_FRONT_AND_BACK, (m_showWireframe) ? GL_LINE : GL_FILL);
-	
+
+
+	if (dirtyVoxels) { 
+		renderer->refreshVoxels(view, proj); 
+		dirtyVoxels = false;
+	}
+		
 	renderer->render(view, proj);
 }
 
