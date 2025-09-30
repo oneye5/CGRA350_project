@@ -41,6 +41,13 @@ public:
         prepass->resize(w, h);
     }
 
+    // call if the scene changes
+    void refreshVoxels(glm::mat4& view, glm::mat4& proj) {
+        auto shaders = getShaders();
+        auto modelMatricies = getModelMatricies();
+        voxelizer->voxelize([&]() { drawAllWithoutSetUniforms(); }, modelMatricies, shaders);
+    }
+
     void render(glm::mat4& view, glm::mat4& proj) {
         cleanDebugParams();
         auto shaders = getShaders();
@@ -48,7 +55,7 @@ public:
         currentProj = proj;
         currentView = view;
 
-        voxelizer->voxelize([&]() { drawAllWithoutSetUniforms(); }, modelMatricies, shaders);
+  
         if (debug_params.voxel_debug_mode_on) {
             voxelizer->renderDebugSlice(debug_params.voxel_slice, debug_params.debug_channel_index);
             return;

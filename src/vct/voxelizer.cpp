@@ -60,23 +60,27 @@ Voxelizer::~Voxelizer() {
 }
 
 void Voxelizer::initializeTextures() {
-
-
     auto make3DTex = [&](GLuint& tex) {
         glGenTextures(1, &tex);
         glBindTexture(GL_TEXTURE_3D, tex);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        int mipLevels = static_cast<int>(std::floor(std::log2(m_params.resolution))) + 1;
+
+        // allocate immutable storage for all mip levels
+        glTexStorage3D(GL_TEXTURE_3D, mipLevels, GL_RGBA8,
+            m_params.resolution,
+            m_params.resolution,
+            m_params.resolution);
+
+        // set sampling parameters
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_BASE_LEVEL, 0);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_LEVEL, 0);
-        glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA8,
-            m_params.resolution, m_params.resolution, m_params.resolution,
-            0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_LEVEL, mipLevels - 1);
+
         glBindTexture(GL_TEXTURE_3D, 0);
         };
 
@@ -84,11 +88,13 @@ void Voxelizer::initializeTextures() {
     make3DTex(m_voxelTex1);
     make3DTex(m_voxelTex2);
 
+    // bind sampler uniforms to texture units
     glUseProgram(m_debugShader);
     glUniform1i(glGetUniformLocation(m_debugShader, "voxelTex0"), 4);
     glUniform1i(glGetUniformLocation(m_debugShader, "voxelTex1"), 5);
     glUniform1i(glGetUniformLocation(m_debugShader, "voxelTex2"), 6);
 }
+
 
 
 void Voxelizer::initializeShaders() {
@@ -150,6 +156,14 @@ void Voxelizer::voxelize(std::function<void()> drawMainGeometry, std::vector<glm
     if (error != GL_NO_ERROR) {
         std::cerr << "OpenGL error after voxelization: " << error << std::endl;
     }
+
+    glBindTexture(GL_TEXTURE_3D, m_voxelTex0);
+    glGenerateMipmap(GL_TEXTURE_3D);
+    glBindTexture(GL_TEXTURE_3D, m_voxelTex1);
+    glGenerateMipmap(GL_TEXTURE_3D);
+    glBindTexture(GL_TEXTURE_3D, m_voxelTex2);
+    glGenerateMipmap(GL_TEXTURE_3D);
+
 }
 
 void Voxelizer::clearVoxelTexture() {

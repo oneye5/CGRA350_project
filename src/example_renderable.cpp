@@ -1,5 +1,5 @@
 #pragma once
-#include "Renderable.hpp"
+#include "renderable.hpp"
 #include "cgra/cgra_wavefront.hpp"
 #include "cgra/cgra_shader.hpp"
 #include <glm/gtc/type_ptr.hpp>
