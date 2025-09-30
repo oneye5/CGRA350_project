@@ -1,3 +1,4 @@
+#pragma once
 #include <istream>
 #include <optional>
 #include <string>
