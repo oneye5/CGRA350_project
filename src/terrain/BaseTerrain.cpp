@@ -44,7 +44,7 @@ void BaseTerrain::setProjViewUniforms(const glm::mat4 &view, const glm::mat4 &pr
 
 
 void BaseTerrain::draw() {
-
+	glUseProgram(shader);
 	glUniform3fv(glGetUniformLocation(shader, "uColor"), 1, value_ptr(vec3{1, 1, 1}));
 
 	glUniform1f(glGetUniformLocation(shader, "max_height"), t_settings.max_height);
