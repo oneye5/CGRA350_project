@@ -112,7 +112,7 @@ void Noise::makeEditUI(bool use_own_window) {
 	}
 
 	ImGui::BeginDisabled(settings.fractal_type == FastNoiseLite::FractalType_None);
-	settings_updated |= ImGui::DragInt("Octaves", &settings.fractal_octaves, 1.0f, 1, 20);
+	settings_updated |= ImGui::DragInt("Octaves", &settings.fractal_octaves, 0.2f, 1, 20);
 	settings_updated |= ImGui::DragFloat("Lacunarity", &settings.fractal_lacunarity, 0.01f, 0.0f, 10.0f);
 	settings_updated |= ImGui::DragFloat("Gain", &settings.fractal_gain, 0.01f, 0.0f, 3.0f);
 	settings_updated |= ImGui::DragFloat("Weighted Strength", &settings.fractal_weighted_strength, 0.01f, 0.0f, 1.0f);
