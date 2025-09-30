@@ -101,7 +101,7 @@ void Application::renderGUI() {
 	ImGui::Text("Application %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 	ImGui::SliderFloat("Pitch", &m_pitch, -pi<float>() / 2, pi<float>() / 2, "%.2f");
 	ImGui::SliderFloat("Yaw", &m_yaw, -pi<float>(), pi<float>(), "%.2f");
-	ImGui::SliderFloat("Distance", &m_distance, 0, 100, "%.2f", 2.0f);
+	ImGui::SliderFloat("Distance", &m_distance, 0, 100, "%.2f");
 
 	// helpful drawing options
 	ImGui::Checkbox("Show axis", &m_show_axis);
