@@ -65,6 +65,7 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/ext/glew-1.10.0")
 add_subdirectory("${PROJECT_SOURCE_DIR}/ext/stb")
 add_subdirectory("${PROJECT_SOURCE_DIR}/ext/imgui")
 add_subdirectory("${PROJECT_SOURCE_DIR}/ext/glm")
+add_subdirectory("${PROJECT_SOURCE_DIR}/ext/FastNoiseLite")
 include_directories("${PROJECT_SOURCE_DIR}/ext") # Add ext in order to access glm subfiles (hack)
 include_directories("${PROJECT_SOURCE_DIR}/src") # Add source to include directory
 
@@ -86,7 +87,7 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 	add_compile_options("$<$<NOT:$<CONFIG:Debug>>:-O2>")
 	# # C++17, full normal warnings
-	add_compile_options(-std=c++1z -Wall -Wextra -pedantic)
+	add_compile_options(-std=c++23 -Wall -Wextra -pedantic)
 	# C++14, full normal warnings
 	# add_compile_options(-std=c++1y -Wall -Wextra -pedantic)
 	# don't export by default
