@@ -254,6 +254,8 @@ namespace {
 
 		// nvidia: avoid debug spam about attribute offsets
 		if (id == 131076) return;
+		// another nvidia debug spam fix
+		if (id == 131204) return;
 
 		cerr << "GL [" << getStringForSource(source) << "] " << getStringForType(type) << ' ' << id << " : ";
 		cerr << message << " (Severity: " << getStringForSeverity(severity) << ')' << endl;
