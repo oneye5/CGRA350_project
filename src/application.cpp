@@ -17,6 +17,7 @@
 #include "cgra/cgra_wavefront.hpp"
 
 #include "lsystem.hpp"
+#include "plant.hpp"
 
 using namespace std;
 using namespace cgra;
@@ -80,8 +81,11 @@ void Application::render() {
 	glPolygonMode(GL_FRONT_AND_BACK, (m_showWireframe) ? GL_LINE : GL_FILL);
 
 
+
+	static plant::Plant myplant = plant::Plant("AB", {{'A', "AB"}}, 0, m_model.shader);
+	myplant.draw(mat4(1), view, proj);
 	// draw the model
-	m_model.draw(view, proj);
+	// m_model.draw(view, proj);
 }
 
 
