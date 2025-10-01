@@ -15,7 +15,7 @@ public:
         shader = sb.build();
 
         // Load mesh
-        mesh = cgra::load_wavefront_data(CGRA_SRCDIR + std::string("//res//assets//teapot.obj")).build();
+        mesh = cgra::load_wavefront_data(CGRA_SRCDIR + std::string("//res//assets//ball1.obj")).build();
 
         // Default transform & color
         modelTransform = glm::mat4(1.0f);

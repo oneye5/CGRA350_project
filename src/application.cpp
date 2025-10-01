@@ -28,26 +28,36 @@ using namespace glm;
 
 Renderer* renderer = nullptr;
 
-ExampleRenderable* exampleRenderable  = nullptr;
 PointLightRenderable* light = nullptr;
 Terrain::BaseTerrain* t_terrain = nullptr;
+ExampleRenderable* exampleRenderable = nullptr;
 
 Application::Application(GLFWwindow *window) : m_window(window) {
 	int width, height;
 	glfwGetFramebufferSize(m_window, &width, &height);
 	renderer = new Renderer(width, height);
 
-	// add all renderables
-	// exampleRenderable = new ExampleRenderable{};
-	// renderer->addRenderable(exampleRenderable);
-	light = new PointLightRenderable();
-	light->modelTransform = glm::translate(glm::mat4(1), glm::vec3(2,10,2));
-	light->modelTransform = glm::scale(light->modelTransform, vec3(1));
-
-	renderer->addRenderable(light);
-
+	
 	t_terrain = new Terrain::BaseTerrain();
+	light = new PointLightRenderable();
+	exampleRenderable = new ExampleRenderable();
+
+	// modifactions
+	light->modelTransform = glm::translate(glm::mat4(1), glm::vec3(2.5,5,2.5));
+	light->modelTransform = glm::scale(light->modelTransform, vec3(0.4));
+
+	exampleRenderable->modelTransform = glm::translate(glm::mat4(1), glm::vec3(3, 3, 3));
+	exampleRenderable->modelTransform = glm::scale(exampleRenderable->modelTransform, vec3(0.5));
+
+	// add renderables
 	renderer->addRenderable(t_terrain);
+	renderer->addRenderable(light);
+	renderer->addRenderable(exampleRenderable);
+
+	// renderer tweaks based on scene size
+	renderer->voxelizer->setCenter(glm::vec3(2.5,2,2.5));
+	renderer->voxelizer->setWorldSize(45);
+
 }
 
 bool dirtyVoxels = true;

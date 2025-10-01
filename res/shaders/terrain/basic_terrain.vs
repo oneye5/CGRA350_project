@@ -60,7 +60,10 @@ void main() {
 	v_out.position = (uModelMatrix * vec4(pos, 1.0)).xyz; // Use world normal
 	
 	mat4 modelView = uViewMatrix * uModelMatrix;
-	v_out.normal = normalize((modelView * vec4(world_normal, 0)).xyz);
+
+	// calcualte world space normal
+	mat3 normalMatrix = transpose(inverse(mat3(uModelMatrix)));
+	v_out.normal = normalize(normalMatrix * world_normal);
 	v_out.textureCoord = aTexCoord;
 
 	// set the screenspace position (needed for converting to fragment data)
