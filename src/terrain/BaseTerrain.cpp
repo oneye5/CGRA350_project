@@ -50,6 +50,7 @@ void BaseTerrain::draw() {
 	glUniform1f(glGetUniformLocation(shader, "min_height"), t_settings.min_height);
 	glUniform1i(glGetUniformLocation(shader, "useTexturing"), useTexturing);
 	glUniform1i(glGetUniformLocation(shader, "useFakedLighting"), useFakedLighting);
+	glUniform1i(glGetUniformLocation(shader, "subdivisions"), plane_subs);
 	glUniform1f(glGetUniformLocation(shader, "amplitude"), t_settings.amplitude);
 	
 	glActiveTexture(GL_TEXTURE0);

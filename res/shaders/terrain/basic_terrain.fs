@@ -140,14 +140,14 @@ void main() {
 		col = mix(vec3(height, height, height), col, 0.8);
 
 		// Calculate lighting
-		vec3 eye = normalize(vec3(1.5, 3.0, 2.0)); // faked light position
+		vec3 eye = normalize(vec3(1.5, 10.0, 2.0)); // faked light position
 		vec3 normal = normalize(f_in.normal);
 
 		// Diffuse lighting
 		float diffuse = max(dot(normal, eye), 0.0);
 
 		// Ambient + diffuse
-		float ambient = 0.8;
+		float ambient = 0.1;
 		float light = ambient + diffuse;
 
 		// Apply lighting
