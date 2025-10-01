@@ -13,14 +13,21 @@ layout(location = 1) out vec4 gNormal;   // world normal.xyz + smoothness
 layout(location = 2) out vec4 gAlbedo;   // albedo.rgb + emissiveFactor
 layout(location = 3) out vec4 gEmissive; // emissive.rgb + spare channel
 
-in vec3 worldPos;
-in vec3 normal; // must be world space
 out vec4 fragColor;
 
 struct MaterialData {
 	vec3 pos, nrm, alb, emi; // world position, world normal, albedo, emissive color
 	float mtl, smoothness, emiFac; // metalic, smoothness, emissive factor (strength of emission)
 };
+
+in VertexData {
+	vec3 worldPos;
+	vec3 normal;
+	vec2 textureCoord;
+} f_in;
+
+uniform sampler2D water_texture;
+const float TEXTURE_SCALAR = 5.0f; // Don't just want the single texture for entire thing so repreat
 
 void writeRenderInfo(MaterialData m) {
 	if (uRenderMode == 0) { // voxel
@@ -58,9 +65,12 @@ void writeRenderInfo(MaterialData m) {
 }
 void main() {
 	MaterialData m;
-	m.pos = worldPos;
-	m.nrm = normal;
-	m.alb = vec3(0.2,0.2,1.0);
+
+	vec3 tex_col = texture(water_texture, f_in.textureCoord).rgb;
+	
+	m.pos = f_in.worldPos;
+	m.nrm = f_in.normal;
+	m.alb = tex_col;
 	m.emi = vec3(0.0);
 	m.mtl = 0.5;
 	m.smoothness = 0.5;

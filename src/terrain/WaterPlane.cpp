@@ -14,6 +14,7 @@ using namespace glm;
 WaterPlane::WaterPlane(GLuint texid) : plane_mesh(cgra::CREATE_PLANE(256, 256).build()), water_texture(texid) {
 	if (!water_texture) { // Water texture not supplied
 		water_texture = cgra::rgba_image(WATER_TEXTURE_PATH).uploadTexture();
+
 	}
 
 	if (!shader) {
@@ -24,6 +25,9 @@ WaterPlane::WaterPlane(GLuint texid) : plane_mesh(cgra::CREATE_PLANE(256, 256).b
 	}
 
 	update_transform({5.0, 5.0, 5.0}, 1.0f);
+
+	glUseProgram(shader);
+	glUniform1i(glGetUniformLocation(shader, "water_texture"), 0);
 }
 
 void WaterPlane::update_transform(glm::vec3 model_scale, float sea_level) {
@@ -46,6 +50,10 @@ void WaterPlane::setProjViewUniforms(const glm::mat4 &view, const glm::mat4 &pro
 
 void WaterPlane::draw() {
 	glUseProgram(shader);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, water_texture);
+
 	plane_mesh.draw();
 }
 

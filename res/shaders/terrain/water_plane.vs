@@ -11,13 +11,17 @@ uniform int uVoxelRes;
 uniform float uVoxelWorldSize;
 uniform int uRenderMode; // 0 = write voxels, 1 = write to gbuffer
 
-out vec3 worldPos;
-out vec3 normal;
+out VertexData {
+	vec3 worldPos;
+	vec3 normal;
+	vec2 textureCoord;
+} v_out;
 
 void main() {
-	worldPos = (uModelMatrix * vec4(aPosition, 1.0)).xyz;
+	v_out.worldPos = (uModelMatrix * vec4(aPosition, 1.0)).xyz;
 	mat3 normalMatrix = transpose(inverse(mat3(uModelMatrix)));
-	normal = normalize(normalMatrix * aNormal);
+	v_out.normal = normalize(normalMatrix * aNormal);
+	v_out.textureCoord = aTexCoord;
 
 	gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aPosition, 1.0);
 }

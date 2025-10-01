@@ -2,6 +2,7 @@
 
 #include "Noise.hpp"
 #include "renderable.hpp"
+#include "WaterPlane.hpp"
 #include "cgra/cgra_mesh.hpp"
 
 namespace Terrain {
@@ -10,6 +11,7 @@ namespace Terrain {
 		float max_height = 1.0f; // Max height of the terrain
 		float min_height = 0.0; // Min height of the terrain
 		float amplitude = 1.0f; // Amplitude of the height generation
+		float sea_level = 1.0f; // The y level to draw the water plane at
 	};
 
 	struct PlaneTerrain {
@@ -20,6 +22,9 @@ namespace Terrain {
 	
 	class BaseTerrain : public Renderable {
 	public:
+		// The default amount to scale the terrain up by (for model transform)
+		inline static const float DEFAULT_TERRAIN_SCALE = 5.0f;
+
 		GLuint shader;
 		Noise t_noise; // The noise to use for the terrain, contains texture
 		PlaneTerrain t_mesh; // The plane mesh to use
@@ -31,6 +36,7 @@ namespace Terrain {
 		GLuint grass_texture;
 		GLuint rock_texture;
 		GLuint snow_texture;
+		WaterPlane* water_plane = nullptr; // The water plane (passed as pointer so renderer can draw it and terrain can set settings)
 
 		bool useFakedLighting = false; // whether to use faked lighting for testing
 

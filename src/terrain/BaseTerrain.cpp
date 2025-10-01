@@ -21,7 +21,7 @@ BaseTerrain::BaseTerrain() {
 	sb.set_shader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//terrain//basic_terrain.fs"));
 	shader = sb.build();
 
-	t_mesh.init_transform = glm::scale(mat4(1.0f), glm::vec3(5));
+	t_mesh.init_transform = glm::scale(mat4(1.0f), glm::vec3(DEFAULT_TERRAIN_SCALE));
 	loadTextures();
 
 	// Set up the texture uniforms cuz only need to do once
@@ -106,6 +106,10 @@ void BaseTerrain::renderUI() {
 
 	if (ImGui::SliderInt("Plane Subdivisions", &plane_subs, 64, 1024)) {
 		changePlaneSubdivision(plane_subs);
+	}
+
+	if (water_plane && ImGui::SliderFloat("Sea Level", &t_settings.sea_level, 0.0f, 5.0f)) {
+		water_plane->update_transform(vec3(DEFAULT_TERRAIN_SCALE), t_settings.sea_level);
 	}
 
 	t_noise.makeEditUI();
