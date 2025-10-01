@@ -21,7 +21,7 @@ BaseTerrain::BaseTerrain() {
 	sb.set_shader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//terrain//basic_terrain.fs"));
 	shader = sb.build();
 
-	t_mesh.init_transform = glm::scale(mat4(1.0f), {2.0, 2.0, 2.0});
+	t_mesh.init_transform = glm::scale(mat4(1.0f), glm::vec3(5));
 	loadTextures();
 
 	// Set up the texture uniforms cuz only need to do once

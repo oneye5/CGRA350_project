@@ -24,13 +24,30 @@ struct MaterialData {
 
 void writeRenderInfo(MaterialData m) {
     if (uRenderMode == 0) { // voxel
-        vec3 vpos = (m.pos + uVoxelWorldSize * 0.5) / uVoxelWorldSize;
+ vec3 vpos = (m.pos + uVoxelWorldSize * 0.5) / uVoxelWorldSize;
         if (any(lessThan(vpos, vec3(0))) || any(greaterThan(vpos, vec3(1)))) return;
+
         ivec3 texCoord = ivec3(vpos * float(uVoxelRes - 1));
 
-        imageStore(voxelTex0, texCoord, vec4(vpos, m.mtl));
-        imageStore(voxelTex1, texCoord, vec4(normalize(m.nrm), m.smoothness));
-        imageStore(voxelTex2, texCoord, vec4(m.alb, m.emiFac));
+        // splat radius in voxels
+        int splatRadius = 1;
+
+        for (int x = -splatRadius; x <= splatRadius; ++x) {
+            for (int y = -splatRadius; y <= splatRadius; ++y) {
+                for (int z = -splatRadius; z <= splatRadius; ++z) {
+                    ivec3 tc = texCoord + ivec3(x, y, z);
+
+                    // clamp to texture bounds
+                    if (any(lessThan(tc, ivec3(0))) || any(greaterThanEqual(tc, ivec3(uVoxelRes))))
+                        continue;
+
+                    // write to voxel textures
+                    imageStore(voxelTex0, tc, vec4(vpos, m.mtl));
+                    imageStore(voxelTex1, tc, vec4(normalize(m.nrm), m.smoothness));
+                    imageStore(voxelTex2, tc, vec4(m.alb, m.emiFac));
+                }
+            }
+        }
     }
     else { // gbuffer
         gPosition = vec4(m.pos, m.mtl);
@@ -39,7 +56,6 @@ void writeRenderInfo(MaterialData m) {
         gEmissive = vec4(m.emi * m.emiFac, 0); // 
     }
 }
-
 void main() {
     MaterialData m;
     m.pos = worldPos;

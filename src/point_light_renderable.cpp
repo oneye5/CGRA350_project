@@ -16,11 +16,11 @@ public:
         shader = sb.build();
 
         // Load mesh
-        mesh = cgra::load_wavefront_data(CGRA_SRCDIR + std::string("//res//assets//teapot.obj")).build(); // temp, use sphere later
+        mesh = cgra::load_wavefront_data(CGRA_SRCDIR + std::string("//res//assets//ball1.obj")).build();
 
         // Default transform & color
         modelTransform = glm::mat4(1.0f);
-        lightColor = glm::vec3(1, 1, 1);
+        lightColor = glm::vec3(1,0.95,0.93);
     }
 
     GLuint getShader() override { return shader; }
@@ -48,7 +48,7 @@ public:
 
     glm::mat4 modelTransform;
     glm::vec3 lightColor = glm::vec3(1);
-    float brightness = 1000000000000000;
+    float brightness = 10000;
     GLuint shader;
     cgra::gl_mesh mesh;
 
