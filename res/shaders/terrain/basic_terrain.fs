@@ -46,7 +46,7 @@ uniform sampler2D snow_texture;
 uniform bool useTexturing; // whether or not to use texturing or just display the heightmap
 uniform bool useFakedLighting; // whether to use faked lighting, just until proper lighting is implemented
 
-const float TEX_BASE_SCALAR = 5.0f;
+const float TEX_BASE_SCALAR = 8.0f;
 
 void writeRenderInfo(MaterialData m) {
 	if (uRenderMode == 0) { // voxel

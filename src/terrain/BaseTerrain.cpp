@@ -133,8 +133,8 @@ void BaseTerrain::renderUI() {
 
 void BaseTerrain::loadTextures() {
 	static const std::string WATER_PATH = CGRA_SRCDIR + std::string("//res//textures//terrain//tex_Water.jpg");
-	static const std::string SAND_PATH = CGRA_SRCDIR + std::string("//res//textures//terrain//sand.png");
-	static const std::string GRASS_PATH = CGRA_SRCDIR + std::string("//res//textures//terrain//gras364.jpg");
+	static const std::string SAND_PATH = CGRA_SRCDIR + std::string("//res//textures//terrain//sand_2.png");
+	static const std::string GRASS_PATH = CGRA_SRCDIR + std::string("//res//textures//terrain//grass_2.jpg");
 	static const std::string ROCK_PATH = CGRA_SRCDIR + std::string("//res//textures//terrain//rock.jpg");
 	static const std::string SNOW_PATH = CGRA_SRCDIR + std::string("//res//textures//terrain//snow.jpg");
 
