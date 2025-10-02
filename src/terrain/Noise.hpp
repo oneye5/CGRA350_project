@@ -5,38 +5,9 @@
 #include <vector>
 #include "../opengl.hpp"
 #include "HydraulicErosion.hpp"
+#include "TerrainSettings.hpp"
 
 namespace Terrain {
-	struct NoiseSettings {
-		// General settings
-		int seed = 1337; // The seed to use for noise generation
-		float frequency = 0.01f; // Noise frequency
-		FastNoiseLite::NoiseType noise_type = FastNoiseLite::NoiseType_Perlin; // The noise type, perlin by default
-		float noise_exp = 1.0f; // Power exponent to use on noise (not too useful but fun)
-
-		// Settings for fractal types
-		FastNoiseLite::FractalType fractal_type = FastNoiseLite::FractalType_None; // Fractal type to use
-		int fractal_octaves = 3; // Amount of layers to use for fractal noise
-		float fractal_lacunarity = 2.0f; // Frequency multiplier between each octave for fractal noise
-		float fractal_gain = 0.5f; // Relative strength of noise in each fractal layer compared to last
-		float fractal_weighted_strength = 0.0f; // Octave weighting for fractal types;
-		float fractal_pingpong_strength = 2.0f; // Strength for ping pong fractal type (not needed for other stuff)
-
-		// Settings for the cellular noise type
-		// Distance function for calculating cell for a given point
-		FastNoiseLite::CellularDistanceFunction cellular_dist_function = FastNoiseLite::CellularDistanceFunction_EuclideanSq;
-		FastNoiseLite::CellularReturnType cellular_return_type = FastNoiseLite::CellularReturnType_Distance; // Value that cellular function returns
-		float cellular_jitter = 1.0f; // Maximum distance a cellular point can move from grid pos
-
-		// Domain warp settings
-		bool use_domain_warp = false; // Whether or not to use domain warp
-		FastNoiseLite::DomainWarpType domain_warp_type = FastNoiseLite::DomainWarpType_OpenSimplex2; // domain warp algorithm
-		float domain_warp_amp = 1.0f; // Max warp distance from original pos
-		// TODO - copy the like frequency settings and stuff into here since domain warp needs separate
-
-		void printSettings() const;
-	};
-
 	class Noise {
 	public:
 		GLuint texID = 0; // The texture ID

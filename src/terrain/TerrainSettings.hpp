@@ -1,0 +1,135 @@
+#pragma once
+
+#include <FastNoiseLite.h>
+#include <map>
+#include <print>
+
+namespace Terrain {
+	struct NoiseSettings {
+		// General settings
+		int seed = 1337; // The seed to use for noise generation
+		float frequency = 0.01f; // Noise frequency
+		FastNoiseLite::NoiseType noise_type = FastNoiseLite::NoiseType_Perlin; // The noise type, perlin by default
+		float noise_exp = 1.0f; // Power exponent to use on noise (not too useful but fun)
+
+		// Settings for fractal types
+		FastNoiseLite::FractalType fractal_type = FastNoiseLite::FractalType_None; // Fractal type to use
+		int fractal_octaves = 3; // Amount of layers to use for fractal noise
+		float fractal_lacunarity = 2.0f; // Frequency multiplier between each octave for fractal noise
+		float fractal_gain = 0.5f; // Relative strength of noise in each fractal layer compared to last
+		float fractal_weighted_strength = 0.0f; // Octave weighting for fractal types;
+		float fractal_pingpong_strength = 2.0f; // Strength for ping pong fractal type (not needed for other stuff)
+
+		// Settings for the cellular noise type
+		// Distance function for calculating cell for a given point
+		FastNoiseLite::CellularDistanceFunction cellular_dist_function = FastNoiseLite::CellularDistanceFunction_EuclideanSq;
+		FastNoiseLite::CellularReturnType cellular_return_type = FastNoiseLite::CellularReturnType_Distance; // Value that cellular function returns
+		float cellular_jitter = 1.0f; // Maximum distance a cellular point can move from grid pos
+
+		// Domain warp settings
+		bool use_domain_warp = false; // Whether or not to use domain warp
+		FastNoiseLite::DomainWarpType domain_warp_type = FastNoiseLite::DomainWarpType_OpenSimplex2; // domain warp algorithm
+		float domain_warp_amp = 1.0f; // Max warp distance from original pos
+		// TODO - copy the like frequency settings and stuff into here since domain warp needs separate
+
+		// Print out settings in struct form to stdout
+		// TODO - add domain warp stuff
+		void printSettings() const {
+			static const std::map<FastNoiseLite::NoiseType, const char *> NOISE_TYPES = {
+				{FastNoiseLite::NoiseType_OpenSimplex2, "FastNoiseLite::NoiseType_OpenSimplex2"},
+				{FastNoiseLite::NoiseType_OpenSimplex2S, "FastNoiseLite::NoiseType_OpenSimplex2S"},
+				{FastNoiseLite::NoiseType_Cellular, "FastNoiseLite::NoiseType_Cellular"},
+				{FastNoiseLite::NoiseType_Perlin, "FastNoiseLite::NoiseType_Perlin"},
+				{FastNoiseLite::NoiseType_ValueCubic, "FastNoiseLite::NoiseType_ValueCubic"},
+				{FastNoiseLite::NoiseType_Value, "FastNoiseLite::NoiseType_Value"}
+			};
+
+			static const std::map<FastNoiseLite::FractalType, const char *> FRACTAL_TYPES = {
+				{FastNoiseLite::FractalType_None, "FastNoiseLite::FractalType_None"},
+				{FastNoiseLite::FractalType_FBm, "FastNoiseLite::FractalType_FBm"},
+				{FastNoiseLite::FractalType_Ridged, "FastNoiseLite::FractalType_Ridged"},
+				{FastNoiseLite::FractalType_PingPong, "FastNoiseLite::FractalType_PingPong"},
+				{FastNoiseLite::FractalType_DomainWarpProgressive, "FastNoiseLite::FractalType_DomainWarpProgressive"},
+				{FastNoiseLite::FractalType_DomainWarpIndependent, "FastNoiseLite::FractalType_DomainWarpIndependent"}
+			};
+
+			// Map for Cellular Distance Function
+			static const std::map<FastNoiseLite::CellularDistanceFunction, const char *> CELLULAR_DISTANCE_FUNCTIONS = {
+				{
+					FastNoiseLite::CellularDistanceFunction_Euclidean,
+					"FastNoiseLite::CellularDistanceFunction_Euclidean"
+				},
+				{
+					FastNoiseLite::CellularDistanceFunction_EuclideanSq,
+					"FastNoiseLite::CellularDistanceFunction_EuclideanSq"
+				},
+				{
+					FastNoiseLite::CellularDistanceFunction_Manhattan,
+					"FastNoiseLite::CellularDistanceFunction_Manhattan"
+				},
+				{FastNoiseLite::CellularDistanceFunction_Hybrid, "FastNoiseLite::CellularDistanceFunction_Hybrid"}
+			};
+
+			// Map for Cellular Return Type
+			static const std::map<FastNoiseLite::CellularReturnType, const char *> CELLULAR_RETURN_TYPES = {
+				{FastNoiseLite::CellularReturnType_CellValue, "FastNoiseLite::CellularReturnType_CellValue"},
+				{FastNoiseLite::CellularReturnType_Distance, "FastNoiseLite::CellularReturnType_Distance"},
+				{FastNoiseLite::CellularReturnType_Distance2, "FastNoiseLite::CellularReturnType_Distance2"},
+				{FastNoiseLite::CellularReturnType_Distance2Add, "FastNoiseLite::CellularReturnType_Distance2Add"},
+				{FastNoiseLite::CellularReturnType_Distance2Sub, "FastNoiseLite::CellularReturnType_Distance2Sub"},
+				{FastNoiseLite::CellularReturnType_Distance2Mul, "FastNoiseLite::CellularReturnType_Distance2Mul"},
+				{FastNoiseLite::CellularReturnType_Distance2Div, "FastNoiseLite::CellularReturnType_Distance2Div"}
+			};
+
+			const char *fractal_type_str = FRACTAL_TYPES.at(fractal_type);
+			const char *noise_type_str = NOISE_TYPES.at(noise_type);
+			const char *cellular_dist_str = CELLULAR_DISTANCE_FUNCTIONS.at(cellular_dist_function);
+			const char *cellular_return_str = CELLULAR_RETURN_TYPES.at(cellular_return_type);
+
+			std::printf("NoiseSettings{\n");
+			// General settings
+			std::printf("\t.seed = %d,\n", seed);
+			std::printf("\t.frequency = %gf,\n", frequency);
+			std::printf("\t.noise_type = %s,\n", noise_type_str);
+			std::printf("\t.noise_exp = %gf,\n", noise_exp);
+
+			// Settings for fractal types
+			std::printf("\n"); // Add newline for separation
+			std::printf("\t.fractal_type = %s,\n", fractal_type_str);
+			std::printf("\t.fractal_octaves = %d,\n", fractal_octaves);
+			std::printf("\t.fractal_lacunarity = %gf,\n", fractal_lacunarity);
+			std::printf("\t.fractal_gain = %gf,\n", fractal_gain);
+			std::printf("\t.fractal_weighted_strength = %gf,\n", fractal_weighted_strength);
+			std::printf("\t.fractal_pingpong_strength = %gf,\n", fractal_pingpong_strength);
+
+			// Settings for the cellular noise type
+			std::printf("\n"); // Add a newline for separation
+			std::printf("\t.cellular_dist_function = %s,\n", cellular_dist_str);
+			std::printf("\t.cellular_return_type = %s,\n", cellular_return_str);
+			std::printf("\t.cellular_jitter = %gf\n", cellular_jitter); // Last one shouldn't have a trailing comma
+
+			// Print the closing brace
+			std::printf("};\n");
+		}
+	};
+
+	namespace Presets {
+		static constexpr NoiseSettings testSettings1 = NoiseSettings{
+			.seed = 1399,
+			.frequency = 0.005f,
+			.noise_type = FastNoiseLite::NoiseType_Perlin,
+			.noise_exp = 1.0f,
+
+			.fractal_type = FastNoiseLite::FractalType_FBm,
+			.fractal_octaves = 4,
+			.fractal_lacunarity = 1.74f,
+			.fractal_gain = 0.56f,
+			.fractal_weighted_strength = 0.0f,
+			.fractal_pingpong_strength = 2.0f,
+
+			.cellular_dist_function = FastNoiseLite::CellularDistanceFunction_EuclideanSq,
+			.cellular_return_type = FastNoiseLite::CellularReturnType_Distance,
+			.cellular_jitter = 1.0f
+		};
+	}
+}

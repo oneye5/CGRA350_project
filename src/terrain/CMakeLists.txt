@@ -8,6 +8,7 @@ set(sources
   "HydraulicErosion.cpp"
   "WaterPlane.hpp"
   "WaterPlane.cpp"
+  "TerrainSettings.hpp"
 )
 
 target_relative_sources(${CGRA_PROJECT} ${sources})

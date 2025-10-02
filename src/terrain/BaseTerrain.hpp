@@ -23,7 +23,7 @@ namespace Terrain {
 	class BaseTerrain : public Renderable {
 	public:
 		// The default amount to scale the terrain up by (for model transform)
-		inline static const float DEFAULT_TERRAIN_SCALE = 5.0f;
+		static constexpr float DEFAULT_TERRAIN_SCALE = 5.0f;
 
 		GLuint shader;
 		Noise t_noise; // The noise to use for the terrain, contains texture
@@ -48,11 +48,8 @@ namespace Terrain {
 		void changePlaneSubdivision(int subs);
 
 		GLuint getShader() override;
-
 		void setProjViewUniforms(const glm::mat4 &view, const glm::mat4 &proj) const override;
-
 		void draw() override;
-
 		glm::mat4 getModelTransform() override;
 
 	private:
