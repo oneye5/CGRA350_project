@@ -9,7 +9,6 @@
 #include <print>
 #include <imgui.h>
 
-#include "BaseTerrain.hpp"
 #include "glm/gtc/constants.hpp"
 
 using namespace Terrain;
@@ -50,27 +49,27 @@ float HydraulicErosion::getHeight(int x, int y) const {
 void HydraulicErosion::setHeight(int x, int y, float h) {
 	if (x < 0 || x >= width || y < 0 || y >= height) {
 		throw std::range_error("Attempted to set height at invalid location");
-		return;
 	}
 	heightmap[y * width + x] = std::clamp(h, 0.0f, 1.0f);
 }
 
-// Get
-float HydraulicErosion::getHeightInterpolated(float x, float y) const {
-	const int xi = static_cast<int>(x);
-	const int yi = static_cast<int>(y);
-	const float xf = x - std::floorf(x); // This is u
-	const float yf = y - std::floorf(y); // this is v
+// Get the height at current point using bilinear interpolation
+float HydraulicErosion::getBilinearHeight(glm::vec2 pos) const {
+	const int xi = static_cast<int>(pos.x);
+	const int yi = static_cast<int>(pos.y);
+	const float u = pos.x - std::floorf(pos.x);
+	const float v = pos.y - std::floorf(pos.y);
 
-	float h00 = getHeight(xi, yi);
-	float h10 = getHeight(xi + 1, yi);
-	float h01 = getHeight(xi, yi + 1);
-	float h11 = getHeight(xi + 1, yi + 1);
+	const float h_tl = getHeight(xi, yi); // Top left height (H00)
+	const float h_tr = getHeight(xi+1, yi); // Top right height (H10)
+	const float h_br = getHeight(xi+1, yi+1); // Bottom right height (H11)
+	const float h_bl = getHeight(xi, yi+1); // Bottom left height (H01)
 
-	float h0 = h00 * (1.0f - xf) + h10 * xf;
-	float h1 = h01 * (1.0f - xf) + h11 * xf;
+	const float h0 = h_tl * (1.0f - u) + h_tr * u;
+	const float h1 = h_bl * (1.0f - u) + h_br * u;
 
-	return h0 * (1 - yf) + h1 * yf;
+	const float interpolated = h0 * (1.0f - v) + h1 * v;
+	return interpolated;
 }
 
 // Calculate gradient from old position by doing bilinear interpolation with points around it
@@ -80,41 +79,80 @@ glm::vec2 HydraulicErosion::calculateBilinearGradient(const glm::vec2 pos) const
 	const float u = pos.x - std::floorf(pos.x);
 	const float v = pos.y - std::floorf(pos.y);
 
-	const float h_c = getHeight(xi, yi); // Center height
-	const float h_cr = getHeight(xi+1, yi); // Right height
-	const float h_br = getHeight(xi+1, yi+1); // Bottom right
-	const float h_bc = getHeight(xi, yi+1); // Bottom
+	const float h_tl = getHeight(xi, yi); // Top left height (H00)
+	const float h_tr = getHeight(xi+1, yi); // Top right height (H10)
+	const float h_br = getHeight(xi+1, yi+1); // Bottom right height (H11)
+	const float h_bl = getHeight(xi, yi+1); // Bottom left height (H01)
 
-	const float g_x = (h_cr - h_c) * (1.0f - v) + (h_br - h_bc) * v; // x component of gradient
-	const float g_y = (h_bc - h_c) * (1.0f - u) + (h_br - h_cr) * u; // y component of gradient
+	const float g_x = (h_tr - h_tl) * (1.0f - v) + (h_br - h_bl) * v; // x component of gradient
+	const float g_y = (h_bl - h_tl) * (1.0f - u) + (h_br - h_tr) * u; // y component of gradient
 	return glm::vec2{g_x, g_y};
 }
 
-void HydraulicErosion::applyErosion(float x, float y, float amount, int radius) {
-	const int xi = static_cast<int>(x);
-	const int yi = static_cast<int>(y);
-	const float f_radius = static_cast<float>(radius);
+void HydraulicErosion::applyErosion(glm::vec2 pos, float amount, int radius) {
+	const int xi = static_cast<int>(pos.x);
+	const int yi = static_cast<int>(pos.y);
+	const glm::vec2 i_pos = glm::vec2(xi, yi);
 
+	const float f_radius = static_cast<float>(radius);
+	std::vector<float> weights;
+	float total_weight = 0.0f;
+
+	// First pass: calculate the weights for each point in radius around erosion point
 	for (int dy = -radius; dy <= radius; dy++) {
 		for (int dx = -radius; dx <= radius; dx++) {
-			float distance = sqrt(dx * dx + dy * dy);
-			if (distance > f_radius) continue;
-
-			// Weight decreases with distance
-			float weight = 1.0f - (distance / f_radius);
-			weight = weight * weight; // Square for smoother falloff
-
-			int px = xi + dx;
-			int py = yi + dy;
-
-			if (px >= 0 && px < width && py >= 0 && py < height) {
-				// TODO - something about setting height by interpolating between points
-				float currentHeight = getHeight(px, py);
-				float deltaHeight = amount * weight;
-				setHeight(px, py, currentHeight + deltaHeight);
+			const glm::vec2 cell_pos = i_pos + glm::vec2(dx, dy);
+			if (cell_pos.x < 0 || cell_pos.x >= width || cell_pos.y < 0 || cell_pos.y >= height) {
+				continue;
 			}
+
+			const float weight = std::max(0.0f, f_radius - glm::length(i_pos - cell_pos));
+			total_weight += weight;
+			weights.push_back(weight);
 		}
 	}
+
+	if (total_weight <= 0.0f) {std::print("Total weight shouldn't be 0");}
+
+	// Second pass: do the actual erosion
+	int i = 0;
+	for (int dy = -radius; dy <= radius; dy++) {
+		for (int dx = -radius; dx <= radius; dx++) {
+			const int cx = xi + dx;
+			const int cy = yi + dy;
+			if (cx < 0 || cx >= width || cy < 0 || cy >= height) {
+				continue;
+			}
+
+			const float weight = weights.at(i++);
+			if (weight <= 0.0f) {continue;}
+
+			const float cell_erosion_amount = amount * (weight / total_weight);
+			const float cell_height = getHeight(cx, cy);
+			setHeight(cx, cy, cell_height - cell_erosion_amount);
+		}
+	}
+}
+
+// Apply deposition
+void HydraulicErosion::applyDeposition(glm::vec2 pos, float amount) {
+	const int x0 = static_cast<int>(floor(pos.x));
+	const int y0 = static_cast<int>(floor(pos.y));
+	const int x1 = x0 + 1;
+	const int y1 = y0 + 1;
+
+	const float fx = pos.x - static_cast<float>(x0);
+	const float fy = pos.y - static_cast<float>(y0);
+
+	float w00 = (1.0f - fx) * (1.0f - fy);
+	float w10 = fx * (1.0f - fy);
+	float w01 = (1.0f - fx) * fy;
+	float w11 = fx * fy;
+
+	setHeight(x0, y0, getHeight(x0, y0) + w00 * amount);
+	setHeight(x1, y0, getHeight(x1, y0) + w10 * amount);
+	setHeight(x0, y1, getHeight(x0, y1) + w01 * amount);
+	setHeight(x1, y1, getHeight(x1, y1) + w11 * amount);
 }
 
 void HydraulicErosion::simulateDroplet() {
@@ -142,12 +180,12 @@ void HydraulicErosion::simulateDroplet() {
 			static std::uniform_real_distribution<float> dist(0.0f, 2.0f * glm::pi<float>());
 
 			float angle = dist(rng);
-			dir_new = glm::vec2(std::cos(angle), std::sin(angle));
+			dir_new = glm::normalize(glm::vec2(std::cos(angle), std::sin(angle)));
 		} else { // normalize the new direction
-			dir_new = glm::vec2(dir_new.x / dir_length, dir_new.y / dir_length); // might as well reuse the length
+			dir_new = glm::normalize(dir_new);
+			// dir_new = glm::vec2(dir_new.x / dir_length, dir_new.y / dir_length); // might as well reuse the length
 		}
 		dir = dir_new;
-
 		glm::vec2 pos_new = pos_old + dir_new;
 		pos = pos_new;
 
@@ -157,24 +195,21 @@ void HydraulicErosion::simulateDroplet() {
 		}
 
 		// calculate difference in old height and new height
-		float h_old = getHeight(static_cast<int>(pos_old.x), static_cast<int>(pos_old.y));
-		float h_new = getHeight(static_cast<int>(pos_new.x), static_cast<int>(pos_new.y));
-		float h_dif = h_new - h_old;
+		const float h_old = getBilinearHeight(pos_old);
+		const float h_new = getBilinearHeight(pos_new);
+		const float h_dif = h_new - h_old;
 
-		// Calculate capacity
 		float capacity = std::max(-h_dif, settings.min_slope) * vel * water * settings.capacity_s;
-		
-
 		if (sediment > capacity) {
 			// Deposit some sediment at point as above carry capacity
 			const float amount_to_deposit = (sediment - capacity) * settings.deposition;
 			sediment -= amount_to_deposit;
 			
-			applyErosion(pos_old.x, pos_old.y, amount_to_deposit, settings.erosion_radius);
+			applyDeposition(pos_old, amount_to_deposit);
 			
 		} else { // Steal some sediment from position and add it to particle sediment
 			const float amount_to_erode = std::min((capacity - sediment) * settings.erode_speed, -h_dif);
-			applyErosion(pos_old.x, pos_old.y, -amount_to_erode, settings.erosion_radius);
+			applyErosion(pos_old, amount_to_erode, settings.erosion_radius);
 			sediment += amount_to_erode;
 		}
 

@@ -7,14 +7,14 @@
 namespace Terrain {
 	struct ErosionSettings {
 		int iterations = 100000;        // Number of droplet simulations
-		int max_lifetime = 30;           // Max steps per droplet
-		float inertia = 0.05f;          // How much droplet resists direction change (0-1)
+		int max_lifetime = 50;           // Max steps per droplet
+		float inertia = 0.30f;          // How much droplet resists direction change (0-1)
 		float capacity_s = 4.0f; // Sediment capacity (P_capacity)
 		float min_slope = 0.01f;   // Minimum sediment capacity (Algorithm calls it P_minslope)
 		float evaporate_speed = 0.01f;   // How fast water evaporates (0-1)
 		float deposition = 0.3f;      // How fast sediment is deposited (0-1)
 		float erode_speed = 0.3f;        // How fast erosion happens (0-1) (P_erosion)
-		float gravity = 4.0f;           // Strength of gravity
+		float gravity = 9.81f;           // Strength of gravity
 		float start_velocity = 1.0f;        // Initial droplet speed
 		float start_water = 1.0f;        // Initial droplet water volume
 		int erosion_radius = 3;          // Radius of erosion brush
@@ -52,9 +52,10 @@ namespace Terrain {
 		// Helper functions for erosion simulation
 		float getHeight(int x, int y) const;
 		void setHeight(int x, int y, float height);
-		float getHeightInterpolated(float x, float y) const;
+		float getBilinearHeight(glm::vec2 pos) const;
 		glm::vec2 calculateBilinearGradient(glm::vec2 pos) const;
-		void applyErosion(float x, float y, float amount, int radius);
+		void applyErosion(glm::vec2 pos, float amount, int radius);
+		void applyDeposition(glm::vec2 pos, float amount);
 		void simulateDroplet();
 	};
 }
