@@ -33,6 +33,8 @@ namespace Terrain {
 		FastNoiseLite::DomainWarpType domain_warp_type = FastNoiseLite::DomainWarpType_OpenSimplex2; // domain warp algorithm
 		float domain_warp_amp = 1.0f; // Max warp distance from original pos
 		// TODO - copy the like frequency settings and stuff into here since domain warp needs separate
+
+		void printSettings() const;
 	};
 
 	class Noise {
