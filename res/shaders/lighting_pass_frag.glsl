@@ -26,16 +26,7 @@ uniform float uTransmittanceNeededForConeTermination;
 uniform vec3  uAmbientColor; 
 
 // set global vars
-float CONE_APERTURE = uConeAperture;
-float STEP_MULTIPLIER = uStepMultiplier;
-float MAX_STEPS = uMaxSteps;
-float EMISSIVE_THRESHOLD = uEmissiveThreshold;
 float VOXEL_SIZE = uVoxelWorldSize / float(uVoxelRes);
-int NUM_CONES = uNumDiffuseCones;
-float BRIGHTNESS_MULTIPLIER = uDiffuseBrightnessMultiplier;
-float OCCLUDE_THRESHOLD_FOR_SECONDARY_CONE = uOccludeThresholdForSecondaryCone;
-float TRANSMITTANCE_NEEDED_CONE_TERMINATION = uTransmittanceNeededForConeTermination;
-vec3 AMBIENT = uAmbientColor;
 const float PI = 3.14159265359;
 vec3 cameraPos = vec3(inverse(uViewMatrix)[3]);
 
@@ -78,7 +69,7 @@ vec3 traceConeWithoutSecondary(vec3 origin, vec3 direction, float aperture) {
     float distance = VOXEL_SIZE * 2.0;
     float transmittance = 1.0;
 
-    for (int i = 0; i < MAX_STEPS / 2; i++) {
+    for (float i = 0.0; i < uMaxSteps / 2.0; i++) {
         vec3 samplePos = origin + direction * distance;
         vec3 sampleCoord = worldToVoxel(samplePos);
 
@@ -99,19 +90,19 @@ vec3 traceConeWithoutSecondary(vec3 origin, vec3 direction, float aperture) {
         // sample volume based on cone diameter
         float sampleVolume = coneDiameter * coneDiameter * coneDiameter;
 
-        if (voxelEmissive > EMISSIVE_THRESHOLD) // surface is emissive
+        if (voxelEmissive > uEmissiveThreshold) // surface is emissive
             accumulatedLight += albedo * voxelEmissive * transmittance * sampleVolume;
 
         // exponential attenuation based on occlusion
-        float extinction = occlusion * STEP_MULTIPLIER;
+        float extinction = occlusion * uStepMultiplier;
         transmittance *= exp(-extinction);
-        distance += coneDiameter * STEP_MULTIPLIER;
+        distance += coneDiameter * uStepMultiplier;
 
-        if (transmittance < TRANSMITTANCE_NEEDED_CONE_TERMINATION)
+        if (transmittance < uTransmittanceNeededForConeTermination)
             break;
     }
 
-    return accumulatedLight + AMBIENT * transmittance;
+    return accumulatedLight + uAmbientColor * transmittance;
 }
 
 vec3 traceCone(vec3 origin, vec3 direction, float aperture) {
@@ -119,7 +110,7 @@ vec3 traceCone(vec3 origin, vec3 direction, float aperture) {
     float distance = VOXEL_SIZE * 2.0;
     float transmittance = 1.0;
 
-    for (float i = 0; i < MAX_STEPS; i++) {
+    for (float i = 0.0; i < uMaxSteps; i++) {
         vec3 samplePos = origin + direction * distance;
         vec3 sampleCoord = worldToVoxel(samplePos);
 
@@ -140,11 +131,11 @@ vec3 traceCone(vec3 origin, vec3 direction, float aperture) {
         float sampleVolume = coneDiameter * coneDiameter * coneDiameter;
 
         // calc lighting
-        if (voxelEmissive > EMISSIVE_THRESHOLD) {
+        if (voxelEmissive > uEmissiveThreshold) {
             // direct emissive contribution
             accumulatedLight += albedo * voxelEmissive * transmittance * sampleVolume;
         }
-        else if (currentOcclusion > OCCLUDE_THRESHOLD_FOR_SECONDARY_CONE) {
+        else if (currentOcclusion > uOccludeThresholdForSecondaryCone) {
             // secondary bounce for occluded surfaces
             vec3 secondaryPos = samplePos + normal * VOXEL_SIZE * 2.0;
             float roughness = 1.0 - smoothness;
@@ -163,16 +154,16 @@ vec3 traceCone(vec3 origin, vec3 direction, float aperture) {
             accumulatedLight += (albedo / PI) * indirectLight * NdotL * transmittance * sampleVolume;
         }
 
-        float extinction = currentOcclusion * STEP_MULTIPLIER; // exponential transmittance falloff
+        float extinction = currentOcclusion * uStepMultiplier; // exponential transmittance falloff
         transmittance *= exp(-extinction);
 
-        distance += coneDiameter * STEP_MULTIPLIER; // adaptive step size based on cone diameter
-        if (transmittance < TRANSMITTANCE_NEEDED_CONE_TERMINATION)
+        distance += coneDiameter * uStepMultiplier; // adaptive step size based on cone diameter
+        if (transmittance < uTransmittanceNeededForConeTermination)
             break;
     }
 
     // add ambient contribution scaled by remaining transmittance
-    return accumulatedLight + AMBIENT * transmittance;
+    return accumulatedLight + uAmbientColor * transmittance;
 }
 
 void getTangentSpace(vec3 normal, out vec3 tangent, out vec3 bitangent) {
@@ -186,8 +177,8 @@ vec3 sampleHemisphere(vec3 origin, vec3 normal) {
     getTangentSpace(normal, tangent, bitangent);
     vec3 totalLight = vec3(0.0);
 
-    for (float i = 0; i < NUM_CONES; i++) {
-        float xi1 = (float(i) + 0.5) / float(NUM_CONES);
+    for (float i = 0; i < uNumDiffuseCones; i++) {
+        float xi1 = (i + 0.5) / uNumDiffuseCones;
         float xi2 = fract(sin(float(i) * 12.9898) * 43758.5453); // random-ish
 
         float theta = acos(sqrt(1.0 - xi1));
@@ -202,10 +193,10 @@ vec3 sampleHemisphere(vec3 origin, vec3 normal) {
             normal * cosTheta
         );
 
-        vec3 coneLight = traceCone(origin, direction, CONE_APERTURE);
+        vec3 coneLight = traceCone(origin, direction, uConeAperture);
         totalLight += coneLight * cosTheta; // weight by cosine term
     }
-    return totalLight * (2.0 * PI / float(NUM_CONES));
+    return totalLight * (2.0 * PI / uNumDiffuseCones);
 }
 
 void main() {
@@ -225,12 +216,11 @@ void main() {
         FragColor = vec4(albedo, 1.0);
         return;
     }
-
-    // check if surface is emissive, if so, set fragment color to it
-    if (emissiveFactor > EMISSIVE_THRESHOLD) {
+    if (emissiveFactor > uEmissiveThreshold) { // check if surface is emissive, if so, set fragment color to it
         FragColor = vec4(emissiveRgb * emissiveFactor, 1.0);
         return;
     }
+
     worldNormal = normalize(worldNormal);
     vec3 traceOrigin = worldPos + worldNormal * VOXEL_SIZE * 2.0;
     vec3 viewDir = normalize(cameraPos - worldPos);
@@ -239,10 +229,10 @@ void main() {
     float roughness = 1.0 - smoothness;
     vec3 F = fresnelSchlickRoughness(NdotV, F0, roughness);     // energy conservation, diffuse is reduced by specular
     vec3 kD = (1.0 - F) * (1.0 - metallic); // mfetals have no diffuse
-    vec3 indirectDiffuse = sampleHemisphere(traceOrigin, worldNormal) * BRIGHTNESS_MULTIPLIER;  // indirect diffuse lighting via hemisphere sampling
+    vec3 indirectDiffuse = sampleHemisphere(traceOrigin, worldNormal) * uDiffuseBrightnessMultiplier;  // indirect diffuse lighting via hemisphere sampling
     vec3 reflectDir = reflect(-viewDir, worldNormal);     // specular reflection
     float specularAperture = tan(roughness * PI * 0.5);
-    vec3 specularLight = traceCone(traceOrigin, reflectDir, specularAperture) * BRIGHTNESS_MULTIPLIER;
+    vec3 specularLight = traceCone(traceOrigin, reflectDir, specularAperture) * uDiffuseBrightnessMultiplier;
 
     // combine lighting with physically based energy conservation
     vec3 diffuse = kD * albedo * indirectDiffuse;
@@ -251,5 +241,4 @@ void main() {
     vec3 finalColor = diffuse + specular;
 
     FragColor = vec4(finalColor, 1.0);
-    //FragColor = vec4(AMBIENT, 1.0);
 }
