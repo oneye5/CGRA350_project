@@ -12,16 +12,23 @@
 using namespace Terrain;
 using namespace glm;
 
+// TODO - not the nicest, maybe redo this lmao (why do i have to redefine them here...)
+GLuint Textures::water = 0;
+GLuint Textures::sand = 0;
+GLuint Textures::grass = 0;
+GLuint Textures::rock = 0;
+GLuint Textures::snow = 0;
+
 static PlaneTerrain CreateBasicPlane(int x_sub, int z_sub);
 
-BaseTerrain::BaseTerrain() {
+BaseTerrain::BaseTerrain() : t_erosion(t_noise.width, t_noise.height) {
 	t_mesh = CreateBasicPlane(512, 512);
 	cgra::shader_builder sb;
 	sb.set_shader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//terrain//basic_terrain.vs"));
 	sb.set_shader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//terrain//basic_terrain.fs"));
 	shader = sb.build();
 
-	t_mesh.init_transform = glm::scale(mat4(1.0f), glm::vec3(5));
+	t_mesh.init_transform = glm::scale(mat4(1.0f), glm::vec3(DEFAULT_TERRAIN_SCALE));
 	loadTextures();
 
 	// Set up the texture uniforms cuz only need to do once
@@ -32,6 +39,7 @@ BaseTerrain::BaseTerrain() {
 	glUniform1i(glGetUniformLocation(shader, "grass_texture"), 3);
 	glUniform1i(glGetUniformLocation(shader, "rock_texture"), 4);
 	glUniform1i(glGetUniformLocation(shader, "snow_texture"), 5);
+
 }
 
 void BaseTerrain::setProjViewUniforms(const glm::mat4 &view, const glm::mat4 &proj) const {
@@ -43,6 +51,11 @@ void BaseTerrain::setProjViewUniforms(const glm::mat4 &view, const glm::mat4 &pr
 
 
 void BaseTerrain::draw() {
+	if (erosion_running) {
+		// TODO - check that running erosion sim here is fine, can do in UI render instead.
+		stepErosion();
+	}
+
 	glUseProgram(shader);
 	glUniform3fv(glGetUniformLocation(shader, "uColor"), 1, value_ptr(vec3{1, 1, 1}));
 
@@ -59,19 +72,19 @@ void BaseTerrain::draw() {
 
 	// Water
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, water_texture);
+	glBindTexture(GL_TEXTURE_2D, texture1);
 	// Sand
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, sand_texture);
+	glBindTexture(GL_TEXTURE_2D, texture2);
 	// Grass
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, grass_texture);
+	glBindTexture(GL_TEXTURE_2D, texture3);
 	// Rock
 	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, rock_texture);
+	glBindTexture(GL_TEXTURE_2D, texture4);
 	// Snow
 	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_2D, snow_texture);
+	glBindTexture(GL_TEXTURE_2D, texture5);
 
 	t_mesh.mesh.draw();
 }
@@ -86,29 +99,8 @@ void BaseTerrain::changePlaneSubdivision(int subs) {
 // with provided subdivisions
 static PlaneTerrain CreateBasicPlane(int x_sub, int z_sub) {
 	PlaneTerrain plane;
-	cgra::mesh_builder mb;
+	cgra::mesh_builder mb = cgra::CREATE_PLANE(x_sub, z_sub);
 	
-	const float x_step = 1.0f / (float)x_sub;
-	const float z_step = 1.0f / (float)z_sub;
-	
-	for (float x = 0.0; x <= 1.0; x += x_step) {
-		for (float z = 0.0; z <= 1.0; z += z_step) {
-			mb.push_vertex({{x, 0.0, z}, {0.0, 1.0, 0.0}, {x, z}});
-		}
-	}
-
-	for (int z = 0; z < z_sub; z++) {
-		for (int x = 0; x < x_sub; x++) {
-			GLuint tl = z * (x_sub + 1) + x; // top left
-			GLuint tr = tl + 1;
-			GLuint bl = tl + (x_sub + 1);
-			GLuint br = bl + 1;
-
-			mb.push_indices({tl, tr, bl});
-			mb.push_indices({bl, tr, br});
-		}
-	}
-
 	plane.mesh = mb.build();
 	return plane;
 }
@@ -129,7 +121,40 @@ void BaseTerrain::renderUI() {
 		changePlaneSubdivision(plane_subs);
 	}
 
+	if (water_plane && ImGui::SliderFloat("Sea Level", &t_settings.sea_level, 0.0f, 5.0f)) {
+		water_plane->update_transform(vec3(DEFAULT_TERRAIN_SCALE), t_settings.sea_level);
+	}
+
 	t_noise.makeEditUI();
+
+	ImGui::Separator();
+
+	// Erosion controls
+	ImGui::Text("Terrain Settings");
+	t_erosion.renderUI();
+
+	if (ImGui::Button("Apply Erosion")) { // stackable
+		applyErosion();
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Regenerate terrain and erode")) {
+		t_noise.generateHeightmap(false);
+		applyErosion();
+	}
+
+	// Real-time erosion stuff
+	if (!erosion_running) {
+		if (ImGui::Button("Start real-time erosion")) {
+			erosion_running = true;
+			t_erosion.newSimulation(t_noise.heightmap, t_noise.width, t_noise.height);
+		}
+	} else {
+		ImGui::Text("Erosion sim running..");
+		ImGui::Text("Currently on iteration %d / %d", t_erosion.iterations_ran, t_erosion.settings.iterations);
+		if (ImGui::Button("Abort")) {
+			erosion_running = false;
+		}
+	}
 
 	ImGui::End();
 }
@@ -141,11 +166,17 @@ void BaseTerrain::loadTextures() {
 	static const std::string ROCK_PATH = CGRA_SRCDIR + std::string("//res//textures//terrain//rock.jpg");
 	static const std::string SNOW_PATH = CGRA_SRCDIR + std::string("//res//textures//terrain//snow.jpg");
 
-	water_texture = cgra::rgba_image(WATER_PATH).uploadTexture();
-	grass_texture = cgra::rgba_image(GRASS_PATH).uploadTexture();
-	sand_texture = cgra::rgba_image(SAND_PATH).uploadTexture();
-	rock_texture = cgra::rgba_image(ROCK_PATH).uploadTexture();
-	snow_texture = cgra::rgba_image(SNOW_PATH).uploadTexture();
+	Textures::water = cgra::rgba_image(WATER_PATH).uploadTexture();
+	Textures::sand = cgra::rgba_image(SAND_PATH).uploadTexture();
+	Textures::grass = cgra::rgba_image(GRASS_PATH).uploadTexture();
+	Textures::rock = cgra::rgba_image(ROCK_PATH).uploadTexture();
+	Textures::snow = cgra::rgba_image(SNOW_PATH).uploadTexture();
+
+	texture1 = Textures::water;
+	texture2 = Textures::sand;
+	texture3 = Textures::grass;
+	texture4 = Textures::rock;
+	texture5 = Textures::snow;
 }
 
 GLuint BaseTerrain::getShader() {
@@ -155,3 +186,19 @@ GLuint BaseTerrain::getShader() {
 mat4 BaseTerrain::getModelTransform() {
 	return t_mesh.init_transform;
 }
+
+// Get the heightmap from noise, apply erosion and then update the heightmap texture
+void BaseTerrain::applyErosion() {
+	t_erosion.newSimulation(t_noise.heightmap, t_noise.width, t_noise.height);
+	t_erosion.simulate();
+	t_noise.setHeightmap(t_erosion.getHeightmap());
+}
+
+void BaseTerrain::stepErosion() {
+	t_erosion.stepSimulation();
+	t_noise.setHeightmap(t_erosion.getHeightmap());
+	if (t_erosion.iterations_ran >= t_erosion.settings.iterations) {
+		erosion_running = false;
+	}
+}
+

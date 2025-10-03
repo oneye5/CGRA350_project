@@ -20,6 +20,7 @@
 #include <point_light_renderable.cpp>
 
 #include "terrain/BaseTerrain.hpp"
+#include "terrain/WaterPlane.hpp"
 
 
 using namespace std;
@@ -40,6 +41,8 @@ Application::Application(GLFWwindow *window) : m_window(window) {
 
 	
 	t_terrain = new Terrain::BaseTerrain();
+	// t_water = new Terrain::WaterPlane();
+	// t_terrain->water_plane = t_water;
 	light = new PointLightRenderable();
 	exampleRenderable = new ExampleRenderable();
 	exampleRenderable2 = new ExampleRenderable();
@@ -55,6 +58,7 @@ Application::Application(GLFWwindow *window) : m_window(window) {
 	exampleRenderable2->modelTransform = glm::scale(glm::mat4(1), vec3(0.2,0.2,-0.2));
 	// add renderables
 	renderer->addRenderable(t_terrain);
+	// renderer->addRenderable(t_water);
 	renderer->addRenderable(light);
 	renderer->addRenderable(exampleRenderable);
 	renderer->addRenderable(exampleRenderable2);
