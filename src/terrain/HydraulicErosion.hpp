@@ -5,6 +5,15 @@
 #include <glm/glm.hpp>
 
 namespace Terrain {
+	// Hydraulic particle droplet.
+	struct Particle {
+		glm::vec2 c_pos;
+		glm::vec2 c_dir;
+		float c_vel;
+		float c_water;
+		float c_sediment;
+	};
+
 	struct ErosionSettings {
 		int iterations = 100000;        // Number of droplet simulations
 		int max_lifetime = 50;           // Max steps per droplet
@@ -22,6 +31,7 @@ namespace Terrain {
 
 	class HydraulicErosion {
 	public:
+		std::vector<Particle> particles; // Particles currently being simulated.
 		int width, height; // The width and height of the heightmap
 		std::vector<float> heightmap; // float based heightmap
 		ErosionSettings settings;
@@ -38,6 +48,8 @@ namespace Terrain {
 		std::vector<uint16_t> getHeightmapAsUint16() const;
 
 		void simulate(int iterations = -1);
+
+		void newSimulation();
 
 		const std::vector<float>& getHeightmap() const {
 			return heightmap;

@@ -200,9 +200,9 @@ void HydraulicErosion::simulateDroplet() {
 		const float h_dif = h_new - h_old;
 
 		float capacity = std::max(-h_dif, settings.min_slope) * vel * water * settings.capacity_s;
-		if (sediment > capacity) {
-			// Deposit some sediment at point as above carry capacity
-			const float amount_to_deposit = (sediment - capacity) * settings.deposition;
+		if (sediment > capacity || h_dif > 0.0) {
+			// Deposit if carrying too much or going uphill
+			const float amount_to_deposit = (h_dif > 0.0) ? std::min(h_dif, sediment) : (sediment - capacity) * settings.deposition;
 			sediment -= amount_to_deposit;
 			
 			applyDeposition(pos_old, amount_to_deposit);
