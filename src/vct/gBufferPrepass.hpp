@@ -95,7 +95,7 @@ private:
 
         // G-Buffer 3: emissive.rgb + spare channel
         glBindTexture(GL_TEXTURE_2D, gAttachments[3]);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0,
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA4, width, height, 0,
                      GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
         setTextureParams();
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3,

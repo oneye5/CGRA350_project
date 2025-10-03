@@ -1,4 +1,3 @@
-
 // std
 #include <iostream>
 #include <string>
@@ -34,12 +33,12 @@ Terrain::BaseTerrain* t_terrain = nullptr;
 ExampleRenderable* exampleRenderable = nullptr;
 ExampleRenderable* exampleRenderable2 = nullptr;
 
-Application::Application(GLFWwindow *window) : m_window(window) {
+Application::Application(GLFWwindow* window) : m_window(window) {
 	int width, height;
 	glfwGetFramebufferSize(m_window, &width, &height);
 	renderer = new Renderer(width, height);
 
-	
+
 	t_terrain = new Terrain::BaseTerrain();
 	// t_water = new Terrain::WaterPlane();
 	// t_terrain->water_plane = t_water;
@@ -48,14 +47,14 @@ Application::Application(GLFWwindow *window) : m_window(window) {
 	exampleRenderable2 = new ExampleRenderable();
 
 	// modifactions
-	light->modelTransform = glm::translate(glm::mat4(1), glm::vec3(2.5,7,2.5));
+	light->modelTransform = glm::translate(glm::mat4(1), glm::vec3(2.5, 7, 2.5));
 	light->modelTransform = glm::scale(light->modelTransform, vec3(0.45));
 
 	exampleRenderable->modelTransform = glm::translate(glm::mat4(1), glm::vec3(3, 3, 3));
 	exampleRenderable->modelTransform = glm::scale(exampleRenderable->modelTransform, vec3(0.4));
 
 	exampleRenderable2->mesh = cgra::load_wavefront_data(CGRA_SRCDIR + std::string("//res//assets//axis.obj")).build();
-	exampleRenderable2->modelTransform = glm::scale(glm::mat4(1), vec3(0.2,0.2,-0.2));
+	exampleRenderable2->modelTransform = glm::scale(glm::mat4(1), vec3(0.2, 0.2, -0.2));
 	// add renderables
 	renderer->addRenderable(t_terrain);
 	// renderer->addRenderable(t_water);
@@ -64,15 +63,48 @@ Application::Application(GLFWwindow *window) : m_window(window) {
 	renderer->addRenderable(exampleRenderable2);
 
 	// renderer tweaks based on scene size
-	renderer->voxelizer->setCenter(glm::vec3(2.5,5,2.5));
+	renderer->voxelizer->setCenter(glm::vec3(2.5, 5, 2.5));
 	renderer->voxelizer->setWorldSize(45);
 
 }
 
 bool dirtyVoxels = true;
+
+void Application::updateCameraMovement(float deltaTime) {
+	// Calculate forward and right directions
+	vec3 forward = vec3(
+		sin(m_yaw) * cos(m_pitch),
+		-sin(m_pitch),
+		-cos(m_yaw) * cos(m_pitch)
+	);
+	vec3 right = vec3(
+		sin(m_yaw + pi<float>() / 2),
+		0,
+		-cos(m_yaw + pi<float>() / 2)
+	);
+	vec3 up = vec3(0, 1, 0);
+
+	float speed = 5.0f * deltaTime; // units per second
+
+	// WASD movement
+	if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS) m_cameraPosition += forward * speed;
+	if (glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS) m_cameraPosition -= forward * speed;
+	if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS) m_cameraPosition += right * speed;
+	if (glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS) m_cameraPosition -= right * speed;
+	if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS) m_cameraPosition += up * speed;
+	if (glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) m_cameraPosition -= up * speed;
+}
+
 void Application::render() {
+	// Calculate delta time
+	static auto lastTime = std::chrono::high_resolution_clock::now();
+	auto currentTime = std::chrono::high_resolution_clock::now();
+	float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
+	lastTime = currentTime;
+
+	updateCameraMovement(deltaTime);
 	int width, height;
-	glfwGetFramebufferSize(m_window, &width, &height);  
+	glfwGetFramebufferSize(m_window, &width, &height);
 	if (width != m_windowsize.x || height != m_windowsize.y) {
 		m_windowsize = vec2(width, height); // update window size
 		onWindowResize();
@@ -82,19 +114,19 @@ void Application::render() {
 
 	// clear the back-buffer
 	glClearColor(0.3f, 0.3f, 0.4f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// enable flags for normal/forward rendering
-	glEnable(GL_DEPTH_TEST); 
+	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
 	// projection matrix
 	mat4 proj = perspective(1.f, float(width) / height, 0.1f, 1000.f);
 
-	// view matrix
-	mat4 view = translate(mat4(1), vec3(0, 0, -m_distance))
-		* rotate(mat4(1), m_pitch, vec3(1, 0, 0))
-		* rotate(mat4(1), m_yaw,   vec3(0, 1, 0));
+	// First-person view matrix
+	mat4 view = rotate(mat4(1), m_pitch, vec3(1, 0, 0))
+		* rotate(mat4(1), m_yaw, vec3(0, 1, 0))
+		* translate(mat4(1), -m_cameraPosition);
 
 
 	// helpful draw options
@@ -103,11 +135,11 @@ void Application::render() {
 	glPolygonMode(GL_FRONT_AND_BACK, (m_showWireframe) ? GL_LINE : GL_FILL);
 
 
-	if (dirtyVoxels) { 
-		renderer->refreshVoxels(view, proj); 
+	if (dirtyVoxels) {
+		renderer->refreshVoxels(view, proj);
 		dirtyVoxels = false;
 	}
-		
+
 	renderer->render(view, proj);
 }
 
@@ -126,7 +158,7 @@ void Application::renderGUI() {
 	ImGui::Text("Application %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 	ImGui::SliderFloat("Pitch", &m_pitch, -pi<float>() / 2, pi<float>() / 2, "%.2f");
 	ImGui::SliderFloat("Yaw", &m_yaw, -pi<float>(), pi<float>(), "%.2f");
-	ImGui::SliderFloat("Distance", &m_distance, 0, 100, "%.2f");
+	ImGui::DragFloat3("Camera Position", &m_cameraPosition[0], 0.1f);
 
 	if (ImGui::Button("Screenshot")) rgba_image::screenshot(true);
 
@@ -181,7 +213,7 @@ void Application::renderGUI() {
 	// standalone preview of the noise texture
 	static int tex_prev_size = 256;
 	ImGui::SetNextWindowPos(ImVec2(500, 5), ImGuiCond_Once);
-	ImGui::SetNextWindowSize(ImVec2(tex_prev_size+32, tex_prev_size+42), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(tex_prev_size + 32, tex_prev_size + 42), ImGuiCond_Once);
 	ImGui::Begin("Texture preview", 0);
 	ImGui::Image((ImTextureID)(intptr_t)t_terrain->t_noise.texID, ImVec2(tex_prev_size, tex_prev_size));
 	ImGui::End();
@@ -190,16 +222,16 @@ void Application::renderGUI() {
 
 void Application::cursorPosCallback(double xpos, double ypos) {
 	if (m_leftMouseDown) {
-		vec2 whsize = m_windowsize / 2.0f;
+		vec2 delta = vec2(xpos, ypos) - m_mousePosition;
 
-		// clamp the pitch to [-pi/2, pi/2]
-		m_pitch += float(acos(glm::clamp((m_mousePosition.y - whsize.y) / whsize.y, -1.0f, 1.0f))
-			- acos(glm::clamp((float(ypos) - whsize.y) / whsize.y, -1.0f, 1.0f)));
-		m_pitch = float(glm::clamp(m_pitch, -pi<float>() / 2, pi<float>() / 2));
+		// Update yaw and pitch based on mouse movement
+		m_yaw += delta.x * 0.005f;
+		m_pitch += delta.y * 0.005f;
 
-		// wrap the yaw to [-pi, pi]
-		m_yaw += float(acos(glm::clamp((m_mousePosition.x - whsize.x) / whsize.x, -1.0f, 1.0f))
-			- acos(glm::clamp((float(xpos) - whsize.x) / whsize.x, -1.0f, 1.0f)));
+		// Clamp pitch
+		m_pitch = glm::clamp(m_pitch, -pi<float>() / 2, pi<float>() / 2);
+
+		// Wrap yaw
 		if (m_yaw > pi<float>()) m_yaw -= float(2 * pi<float>());
 		else if (m_yaw < -pi<float>()) m_yaw += float(2 * pi<float>());
 	}
@@ -220,12 +252,46 @@ void Application::mouseButtonCallback(int button, int action, int mods) {
 
 void Application::scrollCallback(double xoffset, double yoffset) {
 	(void)xoffset; // currently un-used
-	m_distance *= pow(1.1f, -yoffset);
+
+	// Calculate forward direction
+	vec3 forward = vec3(
+		sin(m_yaw) * cos(m_pitch),
+		-sin(m_pitch),
+		-cos(m_yaw) * cos(m_pitch)
+	);
+
+	// Move camera forward/backward
+	m_cameraPosition += forward * float(yoffset) * 0.5f;
 }
 
 
 void Application::keyCallback(int key, int scancode, int action, int mods) {
-	(void)key, (void)scancode, (void)action, (void)mods; // currently un-used
+	(void)scancode, (void)mods; // currently un-used
+
+	if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+		// Calculate forward and right directions
+		vec3 forward = vec3(
+			sin(m_yaw) * cos(m_pitch),
+			-sin(m_pitch),
+			-cos(m_yaw) * cos(m_pitch)
+		);
+		vec3 right = vec3(
+			sin(m_yaw + pi<float>() / 2),
+			0,
+			-cos(m_yaw + pi<float>() / 2)
+		);
+		vec3 up = vec3(0, 1, 0);
+
+		float speed = 0.3f;
+
+		// WASD movement
+		if (key == GLFW_KEY_W) m_cameraPosition += forward * speed;
+		if (key == GLFW_KEY_S) m_cameraPosition -= forward * speed;
+		if (key == GLFW_KEY_D) m_cameraPosition += right * speed;
+		if (key == GLFW_KEY_A) m_cameraPosition -= right * speed;
+		if (key == GLFW_KEY_SPACE) m_cameraPosition += up * speed;
+		if (key == GLFW_KEY_LEFT_SHIFT) m_cameraPosition -= up * speed;
+	}
 }
 
 

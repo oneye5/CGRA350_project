@@ -18,10 +18,9 @@ private:
 	glm::vec2 m_windowsize;
 	GLFWwindow *m_window;
 
-	// oribital camera
 	float m_pitch = .86;
 	float m_yaw = -.86;
-	float m_distance = 20;
+	glm::vec3 m_cameraPosition = glm::vec3(5);
 
 	// last input
 	bool m_leftMouseDown = false;
@@ -40,7 +39,7 @@ public:
 	Application(const Application&) = delete;
 	Application& operator=(const Application&) = delete;
 
-	// rendering callbacks (every frame)
+	void updateCameraMovement(float deltaTime);
 	void render();
 	void onWindowResize();
 	void renderGUI();
