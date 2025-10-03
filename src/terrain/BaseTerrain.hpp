@@ -1,5 +1,6 @@
 #pragma once
 
+#include "HydraulicErosion.hpp"
 #include "Noise.hpp"
 #include "renderable.hpp"
 #include "WaterPlane.hpp"
@@ -38,9 +39,7 @@ namespace Terrain {
 		PlaneTerrain t_mesh; // The plane mesh to use
 		int plane_subs = 512;
 		TerrainSettings t_settings;
-
 		HydraulicErosion t_erosion;
-
 		bool useTexturing = true;
 		GLuint texture1; // The first texture, bottom most (default water)
 		GLuint texture2; // The second texture (default sand)
@@ -53,11 +52,12 @@ namespace Terrain {
 		bool useFakedLighting = false; // whether to use faked lighting for testing
 
 		void renderUI();
-		
 		BaseTerrain();
-
 		// Regenerate the plane mesh with a specific subdivision count
 		void changePlaneSubdivision(int subs);
+
+		// Apply erosion to the heightmap in t_noise
+		void applyErosion();
 
 		GLuint getShader() override;
 		void setProjViewUniforms(const glm::mat4 &view, const glm::mat4 &proj) const override;

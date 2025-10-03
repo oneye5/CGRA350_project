@@ -15,7 +15,7 @@
 using namespace Terrain;
 
 
-Noise::Noise() : erosionSim(DEFAULT_WIDTH, DEFAULT_HEIGHT, 1337) {
+Noise::Noise() {
 	heightmap.resize(width * height);
 	pixels.resize(width * height); // Reserve the size
 	noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
@@ -27,7 +27,7 @@ Noise::Noise() : erosionSim(DEFAULT_WIDTH, DEFAULT_HEIGHT, 1337) {
 	domainWarp.SetFrequency(0.010);
 	domainWarp.SetDomainWarpAmp(1.0f);
 	
-	updatePixels();
+	generateHeightmap();
 	createTexture();
 	//setNoiseSettings(Presets::testSettings1);
 }
@@ -165,41 +165,14 @@ void Noise::makeEditUI(bool use_own_window) {
 
 	if (settings_updated) {
 		updateNoiseFromSettings();
-		updatePixels();
+		generateHeightmap();
 		updateTexture();
 	}
 
 	if (ImGui::Button("Regenerate terrain")) {
-		updatePixels();
+		generateHeightmap();
 		updateTexture();
 	}
-
-
-	ImGui::Separator();
-
-	// ------- Erosion Controls -------
-	// TODO - move these out of here, not sure why I put them here lmao
-	ImGui::Text("Erosion Settings");
-	if (ImGui::Checkbox("Use Erosion", &use_erosion)) {
-		updatePixels();
-		updateTexture();
-	}
-
-	if (use_erosion) {
-		erosionSim.renderUI();
-		
-		if (ImGui::Button("Apply Erosion Once")) {
-			applyErosion();
-			updatePixelsWithHeightmap();
-			updateTexture();
-		}
-    
-		ImGui::SameLine();
-		if (ImGui::Button("Regenerate with Erosion")) {
-			updatePixels(true);  // This will regenerate noise and apply erosion
-			updateTexture();
-		}
-	}	
 	
 	// static const float PREV_SIZE = 256;
 	// ImGui::Image((ImTextureID)(intptr_t)texID, ImVec2(PREV_SIZE, PREV_SIZE));
@@ -224,15 +197,15 @@ void Noise::updateTexture(bool reuse_old) {
 }
 
 // Updates the heightmap vector using the noise generator (with values mapped to
-// [0.0f,1.0f]) and updates pixels vector with uint16 values
-// Also applies the erosion on request.
-void Noise::updatePixels(bool apply_erosion) {
+// [0.0f,1.0f]) and updates pixels vector with uint16 values if update_pixels is true
+// Pass update_pixels as false if don't need to recalculate pixels yet
+void Noise::generateHeightmap(bool update_pixels) {
 	int index = 0;
 
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
-			float fx = (float)x;
-			float fy = (float)y;
+			float fx = static_cast<float>(x);
+			float fy = static_cast<float>(y);
 			
 			// Apply domain warping if enabled
 			if (settings.use_domain_warp) {
@@ -241,28 +214,14 @@ void Noise::updatePixels(bool apply_erosion) {
 			
 			float data = noise.GetNoise(fx, fy);
 			float normal = (data + 1.0f) / 2.0f;
-			normal = pow(normal, settings.noise_exp);
+			normal = powf(normal, settings.noise_exp);
 			heightmap[index++] = normal;
-			
-			// uint16_t result = static_cast<uint16_t>(std::round(normal * max));
-			// pixels[index++] = result;
 		}
 	}
 
-	if (apply_erosion) {
-		applyErosion();
+	if (update_pixels) {
+		updatePixelsWithHeightmap();
 	}
-
-	updatePixelsWithHeightmap();
-}
-
-
-void Noise::applyErosion() {
-	erosionSim.setHeightmap(heightmap);
-
-	erosionSim.simulate();
-
-	heightmap = erosionSim.getHeightmap();
 }
 
 // TODO - check this isn't slow as hell
@@ -292,7 +251,25 @@ void Noise::updateNoiseFromSettings() {
 void Noise::setNoiseSettings(NoiseSettings new_settings) {
 	settings = new_settings;
 	updateNoiseFromSettings();
-	updatePixels();
+	generateHeightmap();
+	updateTexture();
+}
+
+void Noise::setHeightmap(const std::vector<float> &new_heightmap) {
+	if (new_heightmap.size() != heightmap.size()) {
+		// XXX - should update the size outside if changing sizes for some reason
+		throw std::runtime_error("heightmap size mismatch");
+	}
+	heightmap = new_heightmap;
+	updatePixelsWithHeightmap();
+	updateTexture();
+}
+
+void Noise::setHeightPixels(const std::vector<uint16_t> &new_pixels) {
+	if (new_pixels.size() != pixels.size()) {
+		throw std::runtime_error("pixels size mismatch");
+	}
+	pixels = new_pixels;
 	updateTexture();
 }
 
@@ -302,11 +279,11 @@ void Noise::changeTextureSize(int w, int h) {
 	pixels.resize(width * height);
 	heightmap.resize(width * height);
 
-	updatePixels();
+	generateHeightmap();
 	createTexture();
-	erosionSim.setSimulationDims(width, height);
-	erosionSim.setHeightmap(heightmap);
-	// updateTexture();
+
+	// TODO - implement this later, needs to update the stuff in base terrain
+	throw std::runtime_error("Implement this again later");
 }
 
 // Allocates a texture for the noise to use and sets texid to it

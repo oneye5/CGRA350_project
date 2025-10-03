@@ -122,6 +122,21 @@ void BaseTerrain::renderUI() {
 
 	t_noise.makeEditUI();
 
+	ImGui::Separator();
+
+	// Erosion controls
+	ImGui::Text("Terrain Settings");
+	t_erosion.renderUI();
+
+	if (ImGui::Button("Apply Erosion")) { // stackable
+		applyErosion();
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Regenerate terrain and erode")) {
+		t_noise.generateHeightmap(false);
+		applyErosion();
+	}
+
 	ImGui::End();
 }
 
@@ -152,3 +167,11 @@ GLuint BaseTerrain::getShader() {
 mat4 BaseTerrain::getModelTransform() {
 	return t_mesh.init_transform;
 }
+
+// Get the heightmap from noise, apply erosion and then update the heightmap texture
+void BaseTerrain::applyErosion() {
+	t_erosion.newSimulation(t_noise.heightmap, t_noise.width, t_noise.height);
+	t_erosion.simulate();
+	t_noise.setHeightmap(t_erosion.getHeightmap());
+}
+
