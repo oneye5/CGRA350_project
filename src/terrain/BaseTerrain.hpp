@@ -39,7 +39,10 @@ namespace Terrain {
 		PlaneTerrain t_mesh; // The plane mesh to use
 		int plane_subs = 512;
 		TerrainSettings t_settings;
+
 		HydraulicErosion t_erosion;
+		bool erosion_running = false; // Whether or not the erosion sim is currently running (in real-time)
+
 		bool useTexturing = true;
 		GLuint texture1; // The first texture, bottom most (default water)
 		GLuint texture2; // The second texture (default sand)
@@ -58,6 +61,8 @@ namespace Terrain {
 
 		// Apply erosion to the heightmap in t_noise
 		void applyErosion();
+		// Step real-time erosion simulation once
+		void stepErosion();
 
 		GLuint getShader() override;
 		void setProjViewUniforms(const glm::mat4 &view, const glm::mat4 &proj) const override;

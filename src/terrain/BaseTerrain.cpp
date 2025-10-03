@@ -51,6 +51,11 @@ void BaseTerrain::setProjViewUniforms(const glm::mat4 &view, const glm::mat4 &pr
 
 
 void BaseTerrain::draw() {
+	if (erosion_running) {
+		// TODO - check that running erosion sim here is fine, can do in UI render instead.
+		stepErosion();
+	}
+
 	glUseProgram(shader);
 	glUniform3fv(glGetUniformLocation(shader, "uColor"), 1, value_ptr(vec3{1, 1, 1}));
 
@@ -137,6 +142,20 @@ void BaseTerrain::renderUI() {
 		applyErosion();
 	}
 
+	// Real-time erosion stuff
+	if (!erosion_running) {
+		if (ImGui::Button("Start real-time erosion")) {
+			erosion_running = true;
+			t_erosion.newSimulation(t_noise.heightmap, t_noise.width, t_noise.height);
+		}
+	} else {
+		ImGui::Text("Erosion sim running..");
+		ImGui::Text("Currently on iteration %d / %d", t_erosion.iterations_ran, t_erosion.settings.iterations);
+		if (ImGui::Button("Abort")) {
+			erosion_running = false;
+		}
+	}
+
 	ImGui::End();
 }
 
@@ -173,5 +192,13 @@ void BaseTerrain::applyErosion() {
 	t_erosion.newSimulation(t_noise.heightmap, t_noise.width, t_noise.height);
 	t_erosion.simulate();
 	t_noise.setHeightmap(t_erosion.getHeightmap());
+}
+
+void BaseTerrain::stepErosion() {
+	t_erosion.stepSimulation();
+	t_noise.setHeightmap(t_erosion.getHeightmap());
+	if (t_erosion.iterations_ran >= t_erosion.settings.iterations) {
+		erosion_running = false;
+	}
 }
 

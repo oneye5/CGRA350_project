@@ -30,7 +30,7 @@ namespace Terrain {
 		float start_water = 1.0f;        // Initial droplet water volume
 		int erosion_radius = 3;          // Radius of erosion brush
 
-		int steps_per_frame = 10; // How many steps should a particle travel for each frame (when viewing in real time)
+		int particles_per_frame = 100; // Number of particles/ iterations to simulate each frame when running in real-time
 	};
 
 	class HydraulicErosion {

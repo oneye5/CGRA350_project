@@ -246,17 +246,19 @@ void HydraulicErosion::newSimulation(const std::vector<float> &init_heights, int
 	iterations_ran = 0;
 }
 
+// Step the simulation by simulating [particles_per_frame] amount of iterations
 void HydraulicErosion::stepSimulation() {
 	if (iterations_ran > settings.iterations) {
 		// TODO - set some values as invalid here or smth
 		return;
 	}
-	if (!c_particle.valid) { // Particle is invalid, create a new one
-		c_particle = createParticle();
-	}
 
-	simulateDroplet(settings.steps_per_frame);
-	iterations_ran += 1;
+	for (int step_iterations = 0; step_iterations < settings.particles_per_frame; step_iterations++) {
+		// Particle is invalid, create a new one and increment iterations
+		c_particle = createParticle();
+		simulateDroplet(settings.max_lifetime);
+		iterations_ran += 1;
+	}
 }
 
 
@@ -277,6 +279,7 @@ void HydraulicErosion::renderUI(bool use_own_window) {
     
 	if (ImGui::CollapsingHeader("Basic Erosion Settings")) {
 		settingsChanged |= ImGui::SliderInt("Iterations", &erosionSettings.iterations, 1000, 500000);
+		ImGui::SliderInt("Iterations per frame (real-time)", &erosionSettings.particles_per_frame, 1, erosionSettings.iterations-1);
 		settingsChanged |= ImGui::SliderInt("Max Particle Lifetime", &erosionSettings.max_lifetime, 10, 100);
 		settingsChanged |= ImGui::SliderFloat("Inertia", &erosionSettings.inertia, 0.0f, 1.0f);
 		settingsChanged |= ImGui::SliderInt("Erosion Radius", &erosionSettings.erosion_radius, 1, 10);
