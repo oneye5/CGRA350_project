@@ -85,8 +85,8 @@ void writeRenderInfo(MaterialData m) {
 
 vec3 getTerrainColor(vec2 uv, float height) {
 	// Define height thresholds
-	const float water_level = 0.4;
-	const float sand_level = 0.45;
+	const float water_level = 0.15;
+	const float sand_level = 0.25;
 	const float grass_level = 0.5;
 	const float rock_level = 0.65;
 
@@ -131,6 +131,7 @@ void main() {
 	float height = texture(heightMap, f_in.textureCoord).r;
 	vec3 col;
 	if (useTexturing) {
+		//col = texture(sand_texture, f_in.textureCoord * TEX_BASE_SCALAR).rgb;
 		col = getTerrainColor(f_in.textureCoord * TEX_BASE_SCALAR, height).xyz;
 	} else {
 		col = vec3(height, height, height);
