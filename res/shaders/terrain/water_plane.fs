@@ -1,8 +1,8 @@
 #version 440
 
-layout(binding = 0, rgba8) uniform image3D voxelTex0; // Pos.xyz + Metallic
-layout(binding = 1, rgba8) uniform image3D voxelTex1; // Normal.xyz + Smoothness
-layout(binding = 2, rgba8) uniform image3D voxelTex2; // Albedo.rgb + EmissiveFactor
+layout(binding = 0, rgba16f) uniform image3D voxelTex0; // Pos.xyz + Metallic
+layout(binding = 1, rgba16f) uniform image3D voxelTex1; // Normal.xyz + Smoothness
+layout(binding = 2, rgba16f) uniform image3D voxelTex2; // Albedo.rgb + EmissiveFactor
 
 uniform int   uVoxelRes;
 uniform float uVoxelWorldSize;

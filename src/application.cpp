@@ -64,7 +64,7 @@ Application::Application(GLFWwindow *window) : m_window(window) {
 	renderer->addRenderable(exampleRenderable2);
 
 	// renderer tweaks based on scene size
-	renderer->voxelizer->setCenter(glm::vec3(2.5,2,2.5));
+	renderer->voxelizer->setCenter(glm::vec3(2.5,5,2.5));
 	renderer->voxelizer->setWorldSize(45);
 
 }
@@ -148,6 +148,10 @@ void Application::renderGUI() {
 	ImGui::Separator();
 	ImGui::Checkbox("Voxel debug enable", &renderer->debug_params.voxel_debug_mode_on);
 	ImGui::SliderFloat("Voxel slice", &renderer->debug_params.voxel_slice, 0, 1);
+	ImGui::SliderFloat("Voxel world size", &renderer->voxelizer->m_params.worldSize, 1, 100);
+	ImGui::SliderFloat("Voxel world center X", &renderer->voxelizer->m_params.center.x, -50, 50);
+	ImGui::SliderFloat("Voxel world center Y", &renderer->voxelizer->m_params.center.y, -50, 50);
+	ImGui::SliderFloat("Voxel world center Z", &renderer->voxelizer->m_params.center.z, -50, 50);
 	if (ImGui::Button("Voxel show position as RGB")) { renderer->debug_params.debug_channel_index = 1; }
 	if (ImGui::Button("Voxel show metallic as RGB")) { renderer->debug_params.debug_channel_index = 2; }
 	if (ImGui::Button("Voxel show normal as RGB")) { renderer->debug_params.debug_channel_index = 3; }

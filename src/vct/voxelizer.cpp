@@ -66,7 +66,7 @@ void Voxelizer::initializeTextures() {
         int mipLevels = static_cast<int>(std::floor(std::log2(m_params.resolution))) + 1;
 
         // allocate immutable storage for all mip levels
-        glTexStorage3D(GL_TEXTURE_3D, mipLevels, GL_RGBA8,
+        glTexStorage3D(GL_TEXTURE_3D, mipLevels, GL_RGBA16F,
             m_params.resolution,
             m_params.resolution,
             m_params.resolution);
@@ -178,9 +178,9 @@ void Voxelizer::setupVoxelizationState() {
     glViewport(0, 0, m_params.resolution, m_params.resolution);
 
     // Bind voxel texture for writing
-    glBindImageTexture(0, m_voxelTex0, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA8);
-    glBindImageTexture(1, m_voxelTex1, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA8);
-    glBindImageTexture(2, m_voxelTex2, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA8);
+    glBindImageTexture(0, m_voxelTex0, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA16F);
+    glBindImageTexture(1, m_voxelTex1, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA16F);
+    glBindImageTexture(2, m_voxelTex2, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA16F);
 
     // Disable framebuffer rendering since we're writing directly to 3D texture
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
@@ -251,6 +251,8 @@ void Voxelizer::renderDebugSlice(float sliceValue, int debugMode) {
     }
 
     glUseProgram(m_debugShader);
+    glUniform1i(glGetUniformLocation(m_debugShader, "uVoxelRes"), m_params.resolution);
+    glUniform1f(glGetUniformLocation(m_debugShader, "uVoxelWorldSize"), m_params.worldSize);
     glUniform1i(glGetUniformLocation(m_debugShader, "uDebugIndex"), debugMode);
     glActiveTexture(GL_TEXTURE4);
     glBindTexture(GL_TEXTURE_3D, m_voxelTex0);

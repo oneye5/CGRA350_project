@@ -28,7 +28,7 @@ public:
 	light_pass_params params;
 
 	gBufferLightingPass(gBufferPrepass* prepassObj, Voxelizer* voxelizerObj) {
-		prepass = prepassObj;
+		prepass = prepassObj; 
 		voxelizer = voxelizerObj;
 
 		cgra::shader_builder sb;

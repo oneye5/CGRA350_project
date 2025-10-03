@@ -1,8 +1,8 @@
 #version 440
 
-layout(binding = 0, rgba8) uniform image3D voxelTex0; // Pos.xyz + Metallic
-layout(binding = 1, rgba8) uniform image3D voxelTex1; // Normal.xyz + Smoothness
-layout(binding = 2, rgba8) uniform image3D voxelTex2; // Albedo.rgb + EmissiveFactor
+layout(binding = 0, rgba16f) uniform image3D voxelTex0; // Pos.xyz + Metallic
+layout(binding = 1, rgba16f) uniform image3D voxelTex1; // Normal.xyz + Smoothness
+layout(binding = 2, rgba16f) uniform image3D voxelTex2; // Albedo.rgb + EmissiveFactor
 
 uniform int   uVoxelRes;
 uniform float uVoxelWorldSize;
@@ -61,10 +61,10 @@ void main() {
     m.pos = worldPos;
     m.nrm = normal;
     m.alb = vec3(1,1,0);
-    m.emi = vec3(0.0);
-    m.mtl = 0.5;
-    m.smoothness = 0.5;
-    m.emiFac = 0.0;
+    m.emi = vec3(0.0);		
+    m.mtl = 0.99;		// 0 for non-metalic surfaces
+    m.smoothness = 0.4;	// can be thought of as shinyness, eg concrete has a low value
+    m.emiFac = 0.0;		// either 0 or >= 1
 
     writeRenderInfo(m);
     fragColor = vec4(1); // Optional debug color

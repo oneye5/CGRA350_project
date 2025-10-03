@@ -48,7 +48,7 @@ public:
 
     glm::mat4 modelTransform;
     glm::vec3 lightColor = glm::vec3(1.0, 0.9, 0.88);
-    float brightness = 30000;
+    float brightness = 1;
     GLuint shader;
     cgra::gl_mesh mesh;
 
