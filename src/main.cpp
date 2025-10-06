@@ -40,8 +40,8 @@ int main() {
 	}
 
 	// force OpenGL to create a 3.3 core context
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// disallow legacy functionality (helps OS X work)
@@ -110,6 +110,8 @@ int main() {
 	// create the application object (and a global pointer to it)
 	Application application(window);
 	application_ptr = &application;
+
+
 
 	// loop until the user closes the window
 	while (!glfwWindowShouldClose(window)) {
@@ -254,6 +256,8 @@ namespace {
 
 		// nvidia: avoid debug spam about attribute offsets
 		if (id == 131076) return;
+		// another nvidia debug spam fix
+		if (id == 131204) return;
 
 		cerr << "GL [" << getStringForSource(source) << "] " << getStringForType(type) << ' ' << id << " : ";
 		cerr << message << " (Severity: " << getStringForSeverity(severity) << ')' << endl;

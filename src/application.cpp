@@ -1,4 +1,3 @@
-
 // std
 #include <iostream>
 #include <string>
@@ -15,6 +14,13 @@
 #include "cgra/cgra_image.hpp"
 #include "cgra/cgra_shader.hpp"
 #include "cgra/cgra_wavefront.hpp"
+#include <renderer.hpp>
+#include <example_renderable.cpp>
+#include <point_light_renderable.cpp>
+
+#include "opengl.hpp"
+#include "terrain/BaseTerrain.hpp"
+#include "terrain/WaterPlane.hpp"
 
 #include "lsystem.hpp"
 #include "plant.hpp"
@@ -23,58 +29,111 @@ using namespace std;
 using namespace cgra;
 using namespace glm;
 
+Renderer* renderer = nullptr;
 
-void basic_model::draw(const glm::mat4 &view, const glm::mat4 proj) {
-	mat4 modelview = view * modelTransform;
-	
-	glUseProgram(shader); // load shader and variables
-	glUniformMatrix4fv(glGetUniformLocation(shader, "uProjectionMatrix"), 1, false, value_ptr(proj));
-	glUniformMatrix4fv(glGetUniformLocation(shader, "uModelViewMatrix"), 1, false, value_ptr(modelview));
-	glUniform3fv(glGetUniformLocation(shader, "uColor"), 1, value_ptr(color));
+PointLightRenderable* light = nullptr;
+Terrain::BaseTerrain* t_terrain = nullptr;
+ExampleRenderable* exampleRenderable = nullptr;
+ExampleRenderable* exampleRenderable2 = nullptr;
 
-	mesh.draw(); // draw
+glm::vec3 lightPos;
+float lightScale;
+
+Application::Application(GLFWwindow* window) : m_window(window) {
+	int width, height;
+	glfwGetFramebufferSize(m_window, &width, &height);
+	renderer = new Renderer(width, height);
+
+
+	t_terrain = new Terrain::BaseTerrain();
+	// t_water = new Terrain::WaterPlane();
+	// t_terrain->water_plane = t_water;
+	light = new PointLightRenderable();
+	exampleRenderable = new ExampleRenderable();
+	exampleRenderable2 = new ExampleRenderable();
+
+	// modifactions
+	lightPos = glm::vec3(- 2.5, 5, 2.5);
+	lightScale = 0.3;
+	light->modelTransform = glm::translate(glm::mat4(1), lightPos); 
+	light->modelTransform = glm::scale(light->modelTransform, vec3(lightScale));
+	exampleRenderable->modelTransform = glm::translate(glm::mat4(1), glm::vec3(0.5, 4, 0.5));
+	exampleRenderable->modelTransform = glm::scale(exampleRenderable->modelTransform, vec3(0.3));
+	exampleRenderable2->mesh = cgra::load_wavefront_data(CGRA_SRCDIR + std::string("//res//assets//axis.obj")).build();
+	exampleRenderable2->modelTransform = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0));
+	exampleRenderable2->modelTransform = glm::scale(exampleRenderable2->modelTransform, vec3(0.2, 0.2, -0.2));
+
+	// add renderables
+	renderer->addRenderable(t_terrain);
+	// renderer->addRenderable(t_water);
+	renderer->addRenderable(light);
+	renderer->addRenderable(exampleRenderable);
+	renderer->addRenderable(exampleRenderable2);
+
+	// renderer tweaks based on scene size
+	renderer->voxelizer->setCenter(glm::vec3(-5, 5, -5));
+	renderer->voxelizer->setWorldSize(50);
 }
 
+bool dirtyVoxels = true;
 
-Application::Application(GLFWwindow *window) : m_window(window) {
-	
-	shader_builder sb;
-    sb.set_shader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//color_vert.glsl"));
-	sb.set_shader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//color_frag.glsl"));
-	GLuint shader = sb.build();
+void Application::updateCameraMovement(float deltaTime) {
+	// Calculate forward and right directions
+	vec3 forward = vec3(
+		sin(m_yaw) * cos(m_pitch),
+		-sin(m_pitch),
+		-cos(m_yaw) * cos(m_pitch)
+	);
+	vec3 right = vec3(
+		sin(m_yaw + pi<float>() / 2),
+		0,
+		-cos(m_yaw + pi<float>() / 2)
+	);
+	vec3 up = vec3(0, 1, 0);
 
-	m_model.shader = shader;
-	m_model.mesh = load_wavefront_data(CGRA_SRCDIR + std::string("/res//assets//teapot.obj")).build();
-	m_model.color = vec3(1, 0, 0);
+	float speed = 5.0f * deltaTime; // units per second
+
+	// WASD movement
+	if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS) m_cameraPosition += forward * speed;
+	if (glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS) m_cameraPosition -= forward * speed;
+	if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS) m_cameraPosition += right * speed;
+	if (glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS) m_cameraPosition -= right * speed;
+	if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS) m_cameraPosition += up * speed;
+	if (glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) m_cameraPosition -= up * speed;
 }
-
-
-plant::Plant *plantref;
 
 void Application::render() {
-	
-	// retrieve the window hieght
-	int width, height;
-	glfwGetFramebufferSize(m_window, &width, &height); 
+	// Calculate delta time
+	static auto lastTime = std::chrono::high_resolution_clock::now();
+	auto currentTime = std::chrono::high_resolution_clock::now();
+	float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
+	lastTime = currentTime;
 
-	m_windowsize = vec2(width, height); // update window size
+	updateCameraMovement(deltaTime);
+	int width, height;
+	glfwGetFramebufferSize(m_window, &width, &height);
+	if (width != m_windowsize.x || height != m_windowsize.y) {
+		m_windowsize = vec2(width, height); // update window size
+		onWindowResize();
+	}
+
 	glViewport(0, 0, width, height); // set the viewport to draw to the entire window
 
 	// clear the back-buffer
 	glClearColor(0.3f, 0.3f, 0.4f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// enable flags for normal/forward rendering
-	glEnable(GL_DEPTH_TEST); 
+	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
 	// projection matrix
 	mat4 proj = perspective(1.f, float(width) / height, 0.1f, 1000.f);
 
-	// view matrix
-	mat4 view = translate(mat4(1), vec3(0, 0, -m_distance))
-		* rotate(mat4(1), m_pitch, vec3(1, 0, 0))
-		* rotate(mat4(1), m_yaw,   vec3(0, 1, 0));
+	// First-person view matrix
+	mat4 view = rotate(mat4(1), m_pitch, vec3(1, 0, 0))
+		* rotate(mat4(1), m_yaw, vec3(0, 1, 0))
+		* translate(mat4(1), -m_cameraPosition);
 
 
 	// helpful draw options
@@ -82,49 +141,101 @@ void Application::render() {
 	if (m_show_axis) drawAxis(view, proj);
 	glPolygonMode(GL_FRONT_AND_BACK, (m_showWireframe) ? GL_LINE : GL_FILL);
 
-	static plant::Plant myplant = plant::Plant("A", {{'A', "F[&[+A][--A]]???[^[+A][--A]]"}}, 2, m_model.shader, m_model.shader);
-	plantref = &myplant;
-	myplant.draw(mat4(1), view, proj);
+	// TODO: Make plants Renderable
+	// static plant::Plant myplant = plant::Plant("A", {{'A', "F[&[+A][--A]]???[^[+A][--A]]"}}, 2, m_model.shader, m_model.shader);
+	// plantref = &myplant;
+	// myplant.draw(mat4(1), view, proj);
 	// draw the model
 	// m_model.draw(view, proj);
+
+	if (dirtyVoxels) {
+		renderer->refreshVoxels(view, proj);
+		dirtyVoxels = false;
+	}
+
+	renderer->render(view, proj);
 }
 
+void Application::onWindowResize() {
+	renderer->resizeWindow(m_windowsize.x, m_windowsize.y);
+}
 
 void Application::renderGUI() {
 
 	// setup window
-	ImGui::SetNextWindowPos(ImVec2(5, 5), ImGuiSetCond_Once);
-	ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiSetCond_Once);
+	ImGui::SetNextWindowPos(ImVec2(5, 5), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiCond_Once);
 	ImGui::Begin("Options", 0);
 
 	// display current camera parameters
 	ImGui::Text("Application %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 	ImGui::SliderFloat("Pitch", &m_pitch, -pi<float>() / 2, pi<float>() / 2, "%.2f");
 	ImGui::SliderFloat("Yaw", &m_yaw, -pi<float>(), pi<float>(), "%.2f");
-	ImGui::SliderFloat("Distance", &m_distance, 0, 100, "%.2f", 2.0f);
+	ImGui::DragFloat3("Camera Position", &m_cameraPosition[0], 0.1f);
 
-	// helpful drawing options
-	ImGui::Checkbox("Show axis", &m_show_axis);
-	ImGui::SameLine();
-	ImGui::Checkbox("Show grid", &m_show_grid);
-	ImGui::Checkbox("Wireframe", &m_showWireframe);
-	ImGui::SameLine();
+	if (ImGui::SliderFloat3("Light pos", &lightPos[0], -20, 20)) { light->modelTransform = glm::translate(glm::mat4(1), lightPos); light->modelTransform = glm::scale(light->modelTransform, vec3(lightScale));}
+	if (ImGui::SliderFloat("Light scale", &lightScale, 0, 2)) { light->modelTransform = glm::translate(glm::mat4(1), lightPos); light->modelTransform = glm::scale(light->modelTransform, vec3(lightScale)); }
+	ImGui::SliderFloat3("Light color", &light->lightColor[0], 0,1);
+
 	if (ImGui::Button("Screenshot")) rgba_image::screenshot(true);
 
-	
+#pragma region renderer params
 	ImGui::Separator();
+	ImGui::Text("Renderer params:");
+	if (ImGui::Button("Re-voxelize")) { dirtyVoxels = true; }
+	ImGui::SliderFloat("Cone Aperature", &renderer->lightingPass->params.uConeAperture, 0.01, 2);
+	ImGui::SliderFloat("Cone step multiplier", &renderer->lightingPass->params.uStepMultiplier, 0.01, 2);
+	ImGui::SliderFloat("Cone max steps", &renderer->lightingPass->params.uMaxSteps, 0, 1024);
+	ImGui::SliderFloat("Emissive threshold", &renderer->lightingPass->params.uEmissiveThreshold, 0, 1);
+	ImGui::SliderInt("Number of diffuse cones", &renderer->lightingPass->params.uNumDiffuseCones, 0, 128);
+	ImGui::SliderFloat("Transmittance needed for cone termination", &renderer->lightingPass->params.uTransmittanceNeededForConeTermination, 0.0, 1);
+	ImGui::SliderFloat("Ambient R", &renderer->lightingPass->params.uAmbientColor.r, 0.0, 0.5);
+	ImGui::SliderFloat("Ambient G", &renderer->lightingPass->params.uAmbientColor.g, 0.0, 0.5);
+	ImGui::SliderFloat("Ambient B", &renderer->lightingPass->params.uAmbientColor.b, 0.0, 0.5);
+	ImGui::SliderFloat("Reflection blend lower bound", &renderer->lightingPass->params.uReflectionBlendLowerBound, 0, 1);
+	ImGui::SliderFloat("Reflection blend upper bound", &renderer->lightingPass->params.uReflectionBlendUpperBound, 0, 1);
+	ImGui::SliderFloat("Diffuse brightness multiplier", &renderer->lightingPass->params.uDiffuseBrightnessMultiplier, 0, 2000000);
 
-	// example of how to use input boxes
-	static float exampleInput;
-	if (ImGui::InputFloat("example input", &exampleInput)) {
-		cout << "example input changed to " << exampleInput << endl;
-	}
-
-	if (ImGui::Button("GROW")) {
-		plantref->grow();
-	}
+	ImGui::Separator();
+	ImGui::Checkbox("Voxel debug enable", &renderer->debug_params.voxel_debug_mode_on);
+	ImGui::SliderFloat("Voxel slice", &renderer->debug_params.voxel_slice, 0, 1);
+	ImGui::SliderFloat("Voxel world size", &renderer->voxelizer->m_params.worldSize, 1, 100);
+	ImGui::SliderFloat("Voxel world center X", &renderer->voxelizer->m_params.center.x, -50, 50);
+	ImGui::SliderFloat("Voxel world center Y", &renderer->voxelizer->m_params.center.y, -50, 50);
+	ImGui::SliderFloat("Voxel world center Z", &renderer->voxelizer->m_params.center.z, -50, 50);
+	if (ImGui::Button("Voxel show position as RGB")) { renderer->debug_params.debug_channel_index = 1; }
+	if (ImGui::Button("Voxel show metallic as RGB")) { renderer->debug_params.debug_channel_index = 2; }
+	if (ImGui::Button("Voxel show normal as RGB")) { renderer->debug_params.debug_channel_index = 3; }
+	if (ImGui::Button("Voxel show smoothness as RGB")) { renderer->debug_params.debug_channel_index = 4; }
+	if (ImGui::Button("Voxel show albedo as RGB")) { renderer->debug_params.debug_channel_index = 5; }
+	if (ImGui::Button("Voxel show emissive factor as RGB")) { renderer->debug_params.debug_channel_index = 6; }
 
 	// finish creating window
+	ImGui::Separator();
+	ImGui::Checkbox("Gbuffer debug enable", &renderer->debug_params.gbuffer_debug_mode_on);
+	if (ImGui::Button("Gbuffer show position as RGB")) { renderer->debug_params.debug_channel_index = 1; }
+	if (ImGui::Button("Gbuffer show metalic as RGB")) { renderer->debug_params.debug_channel_index = 2; }
+	if (ImGui::Button("Gbuffer show normal as RGB")) { renderer->debug_params.debug_channel_index = 3; }
+	if (ImGui::Button("Gbuffer show smoothness as RGB")) { renderer->debug_params.debug_channel_index = 4; }
+	if (ImGui::Button("Gbuffer show albedo as RGB")) { renderer->debug_params.debug_channel_index = 5; }
+	if (ImGui::Button("Gbuffer show emissive factor as RGB")) { renderer->debug_params.debug_channel_index = 6; }
+	if (ImGui::Button("Gbuffer show emissive colorf as RGB")) { renderer->debug_params.debug_channel_index = 7; }
+	if (ImGui::Button("Gbuffer show 'spare channel' as RGB")) { renderer->debug_params.debug_channel_index = 8; }
+	if (ImGui::Button("Gbuffer show voxel sampled position as RGB")) { renderer->debug_params.debug_channel_index = 9; }
+#pragma endregion
+
+	ImGui::End();
+
+	// Terrain UI stuff
+	t_terrain->renderUI();
+
+	// standalone preview of the noise texture
+	static int tex_prev_size = 256;
+	ImGui::SetNextWindowPos(ImVec2(500, 5), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(tex_prev_size + 32, tex_prev_size + 42), ImGuiCond_Once);
+	ImGui::Begin("Texture preview", 0);
+	ImGui::Image((ImTextureID)(intptr_t)t_terrain->t_noise.texID, ImVec2(tex_prev_size, tex_prev_size));
+>>>>>>> main
 	ImGui::End();
 
 	// {{{ LSystem stuff
@@ -137,16 +248,16 @@ void Application::renderGUI() {
 
 void Application::cursorPosCallback(double xpos, double ypos) {
 	if (m_leftMouseDown) {
-		vec2 whsize = m_windowsize / 2.0f;
+		vec2 delta = vec2(xpos, ypos) - m_mousePosition;
 
-		// clamp the pitch to [-pi/2, pi/2]
-		m_pitch += float(acos(glm::clamp((m_mousePosition.y - whsize.y) / whsize.y, -1.0f, 1.0f))
-			- acos(glm::clamp((float(ypos) - whsize.y) / whsize.y, -1.0f, 1.0f)));
-		m_pitch = float(glm::clamp(m_pitch, -pi<float>() / 2, pi<float>() / 2));
+		// Update yaw and pitch based on mouse movement
+		m_yaw += delta.x * 0.005f;
+		m_pitch += delta.y * 0.005f;
 
-		// wrap the yaw to [-pi, pi]
-		m_yaw += float(acos(glm::clamp((m_mousePosition.x - whsize.x) / whsize.x, -1.0f, 1.0f))
-			- acos(glm::clamp((float(xpos) - whsize.x) / whsize.x, -1.0f, 1.0f)));
+		// Clamp pitch
+		m_pitch = glm::clamp(m_pitch, -pi<float>() / 2, pi<float>() / 2);
+
+		// Wrap yaw
 		if (m_yaw > pi<float>()) m_yaw -= float(2 * pi<float>());
 		else if (m_yaw < -pi<float>()) m_yaw += float(2 * pi<float>());
 	}
@@ -167,12 +278,46 @@ void Application::mouseButtonCallback(int button, int action, int mods) {
 
 void Application::scrollCallback(double xoffset, double yoffset) {
 	(void)xoffset; // currently un-used
-	m_distance *= pow(1.1f, -yoffset);
+
+	// Calculate forward direction
+	vec3 forward = vec3(
+		sin(m_yaw) * cos(m_pitch),
+		-sin(m_pitch),
+		-cos(m_yaw) * cos(m_pitch)
+	);
+
+	// Move camera forward/backward
+	m_cameraPosition += forward * float(yoffset) * 0.5f;
 }
 
 
 void Application::keyCallback(int key, int scancode, int action, int mods) {
-	(void)key, (void)scancode, (void)action, (void)mods; // currently un-used
+	(void)scancode, (void)mods; // currently un-used
+
+	if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+		// Calculate forward and right directions
+		vec3 forward = vec3(
+			sin(m_yaw) * cos(m_pitch),
+			-sin(m_pitch),
+			-cos(m_yaw) * cos(m_pitch)
+		);
+		vec3 right = vec3(
+			sin(m_yaw + pi<float>() / 2),
+			0,
+			-cos(m_yaw + pi<float>() / 2)
+		);
+		vec3 up = vec3(0, 1, 0);
+
+		float speed = 0.3f;
+
+		// WASD movement
+		if (key == GLFW_KEY_W) m_cameraPosition += forward * speed;
+		if (key == GLFW_KEY_S) m_cameraPosition -= forward * speed;
+		if (key == GLFW_KEY_D) m_cameraPosition += right * speed;
+		if (key == GLFW_KEY_A) m_cameraPosition -= right * speed;
+		if (key == GLFW_KEY_SPACE) m_cameraPosition += up * speed;
+		if (key == GLFW_KEY_LEFT_SHIFT) m_cameraPosition -= up * speed;
+	}
 }
 
 

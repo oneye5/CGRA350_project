@@ -8,6 +8,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <iostream>
 
 // stb
 #include <stb_image.h>
@@ -24,7 +25,7 @@ namespace cgra {
 	struct rgba_image {
 		glm::ivec2 size;
 		std::vector<unsigned char> data;
-		glm::vec<2, GLenum> wrap{GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE};
+		glm::vec<2, GLenum> wrap{GL_REPEAT, GL_REPEAT};
 
 		rgba_image() : size(0, 0) { }
 

@@ -147,7 +147,7 @@ namespace cgra {
 
 			if (g_fontTexture) {
 				glDeleteTextures(1, &g_fontTexture);
-				ImGui::GetIO().Fonts->TexID = 0;
+				ImGui::GetIO().Fonts->TexID = nullptr;
 				g_fontTexture = 0;
 			}
 		}
@@ -224,7 +224,7 @@ namespace cgra {
 						pcmd->UserCallback(cmd_list, pcmd);
 					}
 					else {
-						glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)pcmd->TextureId);
+						glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)pcmd->GetTexID());
 						glScissor((int)pcmd->ClipRect.x, (int)(fb_height - pcmd->ClipRect.w), (int)(pcmd->ClipRect.z - pcmd->ClipRect.x), (int)(pcmd->ClipRect.w - pcmd->ClipRect.y));
 						glDrawElements(GL_TRIANGLES, (GLsizei)pcmd->ElemCount, sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, idx_buffer_offset);
 					}
@@ -277,16 +277,42 @@ namespace cgra {
 
 		void keyCallback(GLFWwindow*, int key, int /*scancode*/, int action, int mods) {
 			ImGuiIO& io = ImGui::GetIO();
-			if (action == GLFW_PRESS)
-				io.KeysDown[key] = true;
-			if (action == GLFW_RELEASE)
-				io.KeysDown[key] = false;
+		    ImGuiKey imgui_key = ImGuiKey_None;
 
-			(void)mods; // modifiers are not reliable across systems
-			io.KeyCtrl = io.KeysDown[GLFW_KEY_LEFT_CONTROL] || io.KeysDown[GLFW_KEY_RIGHT_CONTROL];
-			io.KeyShift = io.KeysDown[GLFW_KEY_LEFT_SHIFT] || io.KeysDown[GLFW_KEY_RIGHT_SHIFT];
-			io.KeyAlt = io.KeysDown[GLFW_KEY_LEFT_ALT] || io.KeysDown[GLFW_KEY_RIGHT_ALT];
-			io.KeySuper = io.KeysDown[GLFW_KEY_LEFT_SUPER] || io.KeysDown[GLFW_KEY_RIGHT_SUPER];
+			// Map GLFW keys -> ImGuiKey
+			switch (key) {
+			case GLFW_KEY_TAB: imgui_key = ImGuiKey_Tab; break;
+			case GLFW_KEY_LEFT: imgui_key = ImGuiKey_LeftArrow; break;
+			case GLFW_KEY_RIGHT: imgui_key = ImGuiKey_RightArrow; break;
+			case GLFW_KEY_UP: imgui_key = ImGuiKey_UpArrow; break;
+			case GLFW_KEY_DOWN: imgui_key = ImGuiKey_DownArrow; break;
+			case GLFW_KEY_PAGE_UP: imgui_key = ImGuiKey_PageUp; break;
+			case GLFW_KEY_PAGE_DOWN: imgui_key = ImGuiKey_PageDown; break;
+			case GLFW_KEY_HOME: imgui_key = ImGuiKey_Home; break;
+			case GLFW_KEY_END: imgui_key = ImGuiKey_End; break;
+			case GLFW_KEY_INSERT: imgui_key = ImGuiKey_Insert; break;
+			case GLFW_KEY_DELETE: imgui_key = ImGuiKey_Delete; break;
+			case GLFW_KEY_BACKSPACE: imgui_key = ImGuiKey_Backspace; break;
+			case GLFW_KEY_SPACE: imgui_key = ImGuiKey_Space; break;
+			case GLFW_KEY_ENTER: imgui_key = ImGuiKey_Enter; break;
+			case GLFW_KEY_ESCAPE: imgui_key = ImGuiKey_Escape; break;
+			case GLFW_KEY_A: imgui_key = ImGuiKey_A; break;
+			case GLFW_KEY_C: imgui_key = ImGuiKey_C; break;
+			case GLFW_KEY_V: imgui_key = ImGuiKey_V; break;
+			case GLFW_KEY_X: imgui_key = ImGuiKey_X; break;
+			case GLFW_KEY_Y: imgui_key = ImGuiKey_Y; break;
+			case GLFW_KEY_Z: imgui_key = ImGuiKey_Z; break;
+			default: break;
+			}
+
+			if (imgui_key != ImGuiKey_None) {
+				io.AddKeyEvent(imgui_key, (action == GLFW_PRESS || action == GLFW_REPEAT));
+			}
+
+			io.AddKeyEvent(ImGuiKey_ModCtrl,  (mods & GLFW_MOD_CONTROL) != 0);
+			io.AddKeyEvent(ImGuiKey_ModShift, (mods & GLFW_MOD_SHIFT)   != 0);
+			io.AddKeyEvent(ImGuiKey_ModAlt,   (mods & GLFW_MOD_ALT)     != 0);
+			io.AddKeyEvent(ImGuiKey_ModSuper, (mods & GLFW_MOD_SUPER)   != 0);
 		}
 
 		void charCallback(GLFWwindow*, unsigned int c) {
@@ -298,32 +324,10 @@ namespace cgra {
 
 		bool init(GLFWwindow* window, bool install_callbacks) {
 			g_window = window;
-
+			auto ctx = ImGui::CreateContext();
+			
 			ImGuiIO& io = ImGui::GetIO();
-			// keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array.
-			io.KeyMap[ImGuiKey_Tab] = GLFW_KEY_TAB;
-			io.KeyMap[ImGuiKey_LeftArrow] = GLFW_KEY_LEFT;
-			io.KeyMap[ImGuiKey_RightArrow] = GLFW_KEY_RIGHT;
-			io.KeyMap[ImGuiKey_UpArrow] = GLFW_KEY_UP;
-			io.KeyMap[ImGuiKey_DownArrow] = GLFW_KEY_DOWN;
-			io.KeyMap[ImGuiKey_PageUp] = GLFW_KEY_PAGE_UP;
-			io.KeyMap[ImGuiKey_PageDown] = GLFW_KEY_PAGE_DOWN;
-			io.KeyMap[ImGuiKey_Home] = GLFW_KEY_HOME;
-			io.KeyMap[ImGuiKey_End] = GLFW_KEY_END;
-			io.KeyMap[ImGuiKey_Delete] = GLFW_KEY_DELETE;
-			io.KeyMap[ImGuiKey_Backspace] = GLFW_KEY_BACKSPACE;
-			io.KeyMap[ImGuiKey_Enter] = GLFW_KEY_ENTER;
-			io.KeyMap[ImGuiKey_Escape] = GLFW_KEY_ESCAPE;
-			io.KeyMap[ImGuiKey_A] = GLFW_KEY_A;
-			io.KeyMap[ImGuiKey_C] = GLFW_KEY_C;
-			io.KeyMap[ImGuiKey_V] = GLFW_KEY_V;
-			io.KeyMap[ImGuiKey_X] = GLFW_KEY_X;
-			io.KeyMap[ImGuiKey_Y] = GLFW_KEY_Y;
-			io.KeyMap[ImGuiKey_Z] = GLFW_KEY_Z;
 
-			// alternatively you can set this to NULL and call ImGui::GetDrawData()
-			// after ImGui::Render() to get the same ImDrawData pointer.
-			io.RenderDrawListsFn = renderDrawLists;
 			io.SetClipboardTextFn = setClipboardText;
 			io.GetClipboardTextFn = getClipboardText;
 			io.ClipboardUserData = g_window;
@@ -389,11 +393,12 @@ namespace cgra {
 
 		void render() {
 			ImGui::Render();
+			renderDrawLists(ImGui::GetDrawData());
 		}
 
 		void shutdown() {
 			invalidateDeviceObjects();
-			ImGui::Shutdown();
+			ImGui::DestroyContext();
 		}
 
 	}
