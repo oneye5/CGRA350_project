@@ -28,7 +28,8 @@ BaseTerrain::BaseTerrain() : t_erosion(t_noise.width, t_noise.height) {
 	sb.set_shader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//terrain//basic_terrain.fs"));
 	shader = sb.build();
 
-	t_mesh.init_transform = glm::scale(mat4(1.0f), glm::vec3(DEFAULT_TERRAIN_SCALE));
+	t_mesh.init_transform = glm::translate(glm::mat4(1), glm::vec3(-5,0,-5));
+	t_mesh.init_transform = glm::scale(t_mesh.init_transform, glm::vec3(DEFAULT_TERRAIN_SCALE));
 	loadTextures();
 
 	// Set up the texture uniforms cuz only need to do once

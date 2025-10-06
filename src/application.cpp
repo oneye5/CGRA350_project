@@ -33,6 +33,9 @@ Terrain::BaseTerrain* t_terrain = nullptr;
 ExampleRenderable* exampleRenderable = nullptr;
 ExampleRenderable* exampleRenderable2 = nullptr;
 
+glm::vec3 lightPos;
+float lightScale;
+
 Application::Application(GLFWwindow* window) : m_window(window) {
 	int width, height;
 	glfwGetFramebufferSize(m_window, &width, &height);
@@ -47,14 +50,14 @@ Application::Application(GLFWwindow* window) : m_window(window) {
 	exampleRenderable2 = new ExampleRenderable();
 
 	// modifactions
-	light->modelTransform = glm::translate(glm::mat4(1), glm::vec3(-2.5, 5, 2.5));
-	light->modelTransform = glm::scale(light->modelTransform, vec3(0.3));
-
+	lightPos = glm::vec3(- 2.5, 5, 2.5);
+	lightScale = 0.3;
+	light->modelTransform = glm::translate(glm::mat4(1), lightPos); 
+	light->modelTransform = glm::scale(light->modelTransform, vec3(lightScale));
 	exampleRenderable->modelTransform = glm::translate(glm::mat4(1), glm::vec3(0.5, 4, 0.5));
 	exampleRenderable->modelTransform = glm::scale(exampleRenderable->modelTransform, vec3(0.3));
-
 	exampleRenderable2->mesh = cgra::load_wavefront_data(CGRA_SRCDIR + std::string("//res//assets//axis.obj")).build();
-	exampleRenderable2->modelTransform = glm::translate(glm::mat4(1), glm::vec3(-2.5, 0, -2.5));
+	exampleRenderable2->modelTransform = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0));
 	exampleRenderable2->modelTransform = glm::scale(exampleRenderable2->modelTransform, vec3(0.2, 0.2, -0.2));
 
 	// add renderables
@@ -62,11 +65,11 @@ Application::Application(GLFWwindow* window) : m_window(window) {
 	// renderer->addRenderable(t_water);
 	renderer->addRenderable(light);
 	renderer->addRenderable(exampleRenderable);
-	//renderer->addRenderable(exampleRenderable2);
+	renderer->addRenderable(exampleRenderable2);
 
 	// renderer tweaks based on scene size
-	renderer->voxelizer->setCenter(glm::vec3(-2.5, 5, -2.5));
-	renderer->voxelizer->setWorldSize(25);
+	renderer->voxelizer->setCenter(glm::vec3(-5, 5, -5));
+	renderer->voxelizer->setWorldSize(50);
 }
 
 bool dirtyVoxels = true;
@@ -161,6 +164,10 @@ void Application::renderGUI() {
 	ImGui::SliderFloat("Yaw", &m_yaw, -pi<float>(), pi<float>(), "%.2f");
 	ImGui::DragFloat3("Camera Position", &m_cameraPosition[0], 0.1f);
 
+	if (ImGui::SliderFloat3("Light pos", &lightPos[0], -20, 20)) { light->modelTransform = glm::translate(glm::mat4(1), lightPos); light->modelTransform = glm::scale(light->modelTransform, vec3(lightScale));}
+	if (ImGui::SliderFloat("Light scale", &lightScale, 0, 2)) { light->modelTransform = glm::translate(glm::mat4(1), lightPos); light->modelTransform = glm::scale(light->modelTransform, vec3(lightScale)); }
+	ImGui::SliderFloat3("Light color", &light->lightColor[0], 0,1);
+
 	if (ImGui::Button("Screenshot")) rgba_image::screenshot(true);
 
 #pragma region renderer params
@@ -178,6 +185,7 @@ void Application::renderGUI() {
 	ImGui::SliderFloat("Ambient B", &renderer->lightingPass->params.uAmbientColor.b, 0.0, 0.5);
 	ImGui::SliderFloat("Reflection blend lower bound", &renderer->lightingPass->params.uReflectionBlendLowerBound, 0, 1);
 	ImGui::SliderFloat("Reflection blend upper bound", &renderer->lightingPass->params.uReflectionBlendUpperBound, 0, 1);
+	ImGui::SliderFloat("Diffuse brightness multiplier", &renderer->lightingPass->params.uDiffuseBrightnessMultiplier, 0, 2000000);
 
 	ImGui::Separator();
 	ImGui::Checkbox("Voxel debug enable", &renderer->debug_params.voxel_debug_mode_on);
