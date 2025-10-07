@@ -235,7 +235,6 @@ void Application::renderGUI() {
 	ImGui::SetNextWindowSize(ImVec2(tex_prev_size + 32, tex_prev_size + 42), ImGuiCond_Once);
 	ImGui::Begin("Texture preview", 0);
 	ImGui::Image((ImTextureID)(intptr_t)t_terrain->t_noise.texID, ImVec2(tex_prev_size, tex_prev_size));
->>>>>>> main
 	ImGui::End();
 
 	// {{{ LSystem stuff
