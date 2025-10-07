@@ -38,7 +38,7 @@ public:
 
     void draw() override {
         glUseProgram(shader);
-        glUniform3fv(glGetUniformLocation(shader, "uLightColor"),1 ,glm::value_ptr((lightColor *brightness)));
+        glUniform3fv(glGetUniformLocation(shader, "uLightColor"),1 ,glm::value_ptr((lightColor * brightness)));
         mesh.draw();
     }
 

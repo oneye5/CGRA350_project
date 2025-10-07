@@ -33,7 +33,7 @@ uniform bool uToneMapEnable;
 
 const float PI = 3.14159265359;
 #define APERTURE_SCALE 1.0
-
+#define REFLECTION_RANDOM_STR 0.05
 /*
     FEATURES:
     Emissive based specular for rough materials, geometry based reflections for smooth, with smooth blending between the two
@@ -48,6 +48,11 @@ const float PI = 3.14159265359;
 
     Filmic tone mapping
 */  
+
+float fastRand(float seed) {
+    return fract(sin(seed * 12.9898) * 43758.5453);
+}
+
 
 vec3 toneMapFilmic(vec3 color) {
     color = max(vec3(0.0), color - 0.004);
@@ -269,7 +274,7 @@ void main() {
     vec3 indirectGeometryResult = vec3(0);
     vec3 indirectSpecularResult = traceCone(traceOrigin, reflectDir, specularAperture, false).xyz;
     if (smoothness >= uReflectionBlendLowerBound) // optimization for when the result is not used
-        indirectGeometryResult = traceConeAgainstGeometry(traceOrigin, reflectDir, 0.1).xyz;
+        indirectGeometryResult = traceConeAgainstGeometry(traceOrigin, reflectDir, 0.05 + fastRand(traceOrigin.x + traceOrigin.y + traceOrigin.z) * REFLECTION_RANDOM_STR).xyz; // randomness to avoid blocky reflections
     float blendFactor = smoothstep(uReflectionBlendLowerBound, uReflectionBlendUpperBound, smoothness);
     vec3 indirectSpecular = mix(indirectSpecularResult.rgb, indirectGeometryResult.rgb * 1.5, blendFactor); // blends between specular highlight and reflection, bit of a hack
 

@@ -159,9 +159,11 @@ void Application::renderGUI() {
 	if (ImGui::SliderFloat3("Light pos", &lightPos[0], -20, 20)) { light->modelTransform = glm::translate(glm::mat4(1), lightPos); light->modelTransform = glm::scale(light->modelTransform, vec3(lightScale));}
 	if (ImGui::SliderFloat3("Light scale", &lightScale[0], 0, 4)) { light->modelTransform = glm::translate(glm::mat4(1), lightPos); light->modelTransform = glm::scale(light->modelTransform, vec3(lightScale)); }
 	ImGui::SliderFloat3("Light color", &light->lightColor[0], 0,1);
+	ImGui::SliderFloat("Light brightness", &light->brightness, 1, 100000);
 
 	ImGui::SliderFloat3("Horizon color", &renderer->lightingPass->params.uHorizonColor[0], 0, 1);
 	ImGui::SliderFloat3("Zenith color", &renderer->lightingPass->params.uZenithColor[0], 0, 1);
+
 	//if (ImGui::Button("Screenshot")) rgba_image::screenshot(true);
 
 #pragma region renderer params
@@ -177,7 +179,7 @@ void Application::renderGUI() {
 	ImGui::SliderFloat3("Ambient RGB", &renderer->lightingPass->params.uAmbientColor[0], 0.0, 1);
 	ImGui::SliderFloat("Reflection blend lower bound", &renderer->lightingPass->params.uReflectionBlendLowerBound, 0, 1);
 	ImGui::SliderFloat("Reflection blend upper bound", &renderer->lightingPass->params.uReflectionBlendUpperBound, 0, 1);
-	ImGui::SliderFloat("Diffuse brightness multiplier", &renderer->lightingPass->params.uDiffuseBrightnessMultiplier, 0, 10000);
+	ImGui::SliderFloat("Diffuse brightness multiplier", &renderer->lightingPass->params.uDiffuseBrightnessMultiplier, 0, 100000);
 
 	ImGui::Separator();
 	ImGui::Checkbox("Voxel debug enable", &renderer->debug_params.voxel_debug_mode_on);
