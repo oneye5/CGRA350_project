@@ -22,9 +22,8 @@ uniform float amplitude;
 uniform sampler2D heightMap; // The heightmap
 
 uniform int subdivisions; // How many subdivisions the plane has (needed for normal calculation)
-const float TERRAIN_SIZE_SCALAR = 5.0f; // The amount the plane gets scaled up by with the model matrix (needed for normal calculation)
-// TODO - probs make this a uniform later if we do change the terrain size at all
-
+uniform float terrain_size_scalar; // The amount the plane gets scaled up by with the model matrix (needed for normal calculation)
+// TODO - separate into vec2 if allowing non square terrain
 
 // Calculate the normals for a position by sampling neighbouring points
 vec3 calculateNormal(vec2 texCoord) {
@@ -32,14 +31,15 @@ vec3 calculateNormal(vec2 texCoord) {
 	vec2 texelSize = 1.0f / heightMapSize;
 
 	// Sample neighboring heights
-	float heightscale = amplitude * max_height;
+	//float heightscale = amplitude * max_height;
+	float heightscale = amplitude;
 	float heightL = texture(heightMap, texCoord + vec2(-texelSize.x, 0.0)).r * heightscale;
 	float heightR = texture(heightMap, texCoord + vec2(texelSize.x, 0.0)).r * heightscale;
 	float heightD = texture(heightMap, texCoord + vec2(0.0, -texelSize.y)).r * heightscale;
 	float heightU = texture(heightMap, texCoord + vec2(0.0, texelSize.y)).r * heightscale;
 
 	float modelSpacing = 1.0 / float(subdivisions); // Distance between vertices in model space (0 to 1)
-	float worldSpacing = modelSpacing * TERRAIN_SIZE_SCALAR;  // After model matrix scale
+	float worldSpacing = modelSpacing * terrain_size_scalar;  // After model matrix scale
 
 	// tangent vectors
 	vec3 tangentX = vec3(worldSpacing * 2.0, heightR - heightL, 0.0);
@@ -54,7 +54,7 @@ void main() {
 	// transform vertex data to viewspace
 	float height = texture(heightMap, aTexCoord).r * amplitude;
 	float y_pos = max_height * height;
-	y_pos = clamp(y_pos, min_height, max_height);
+	//y_pos = clamp(y_pos, min_height, max_height);
 
 	vec3 pos = vec3(aPosition.x, y_pos, aPosition.z);
 	v_out.position = (uModelMatrix * vec4(pos, 1.0)).xyz; // Use world normal

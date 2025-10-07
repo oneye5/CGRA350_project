@@ -24,7 +24,7 @@ WaterPlane::WaterPlane(GLuint texid) : plane_mesh(cgra::CREATE_PLANE(256, 256).b
 		shader = sb.build();
 	}
 
-	update_transform({5.0, 5.0, 5.0}, 1.0f);
+	update_transform({10.0f, 5.0, 10.0f}, 0.0f);
 
 	glUseProgram(shader);
 	glUniform1i(glGetUniformLocation(shader, "water_texture"), 0);
@@ -32,7 +32,8 @@ WaterPlane::WaterPlane(GLuint texid) : plane_mesh(cgra::CREATE_PLANE(256, 256).b
 
 void WaterPlane::update_transform(glm::vec3 model_scale, float sea_level) {
 	mat4 m_scale = glm::scale(mat4(1.0f), model_scale);
-	mat4 m_trans = glm::translate(mat4(1.0f), {0.0, sea_level, 0.0});
+	vec3 trans = vec3(0.0f - (model_scale.x / 2.0f), sea_level, 0.0f - (model_scale.z / 2.0f));
+	mat4 m_trans = glm::translate(mat4(1.0f), trans);
 
 	model_transform = m_trans * m_scale;
 }

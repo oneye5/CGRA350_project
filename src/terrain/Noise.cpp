@@ -39,14 +39,14 @@ void Noise::makeEditUI(bool use_own_window) {
 		ImGui::SetNextWindowPos(ImVec2(400, 5), ImGuiCond_Once);
 		ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_Once);
 		ImGui::Begin("Noise", 0);
-	} else {ImGui::Separator();}
-
-	ImGui::Text("General Settings");
+	}
 
 	int w = width;
 	if (ImGui::SliderInt("Texture size (square)", &w, 64, 1024)) {
 		changeTextureSize(w, w);
 	}
+
+	ImGui::Text("General Settings");
 	
 	bool settings_updated = false;
 
