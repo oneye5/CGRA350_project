@@ -62,14 +62,14 @@ void writeRenderInfo(MaterialData m) {
 void main() {
 	MaterialData m;
 
-	vec3 tex_col = texture(water_texture, f_in.textureCoord).rgb;
+	vec3 tex_col = texture(water_texture, f_in.textureCoord * 8.0f).rgb;
 	
 	m.pos = f_in.worldPos;
 	m.nrm = f_in.normal;
 	m.alb = tex_col;
 	m.emi = vec3(0.0);
-	m.mtl = 0.5;
-	m.smoothness = 0.5;
+	m.mtl = 0.7;
+	m.smoothness = 0.7;
 	m.emiFac = 0.0;
 
 	writeRenderInfo(m);

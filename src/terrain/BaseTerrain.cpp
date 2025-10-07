@@ -39,7 +39,6 @@ BaseTerrain::BaseTerrain() : t_erosion(t_noise.width, t_noise.height) {
 	glUniform1i(glGetUniformLocation(shader, "grass_texture"), 3);
 	glUniform1i(glGetUniformLocation(shader, "rock_texture"), 4);
 	glUniform1i(glGetUniformLocation(shader, "snow_texture"), 5);
-
 }
 
 void BaseTerrain::setProjViewUniforms(const glm::mat4 &view, const glm::mat4 &proj) const {
@@ -68,6 +67,8 @@ void BaseTerrain::draw() {
 
 	glUniform1f(glGetUniformLocation(shader, "min_rock_slope"), t_settings.min_rock_slope);
 	glUniform1f(glGetUniformLocation(shader, "max_grass_slope"), t_settings.max_grass_slope);
+
+	glUniform1f(glGetUniformLocation(shader, "terrain_size_scalar"), t_settings.model_scale.x);
 	
 	glActiveTexture(GL_TEXTURE0);
 	// glUniform1i(glGetUniformLocation(shader, "heightMap"), 0);
@@ -121,29 +122,33 @@ void BaseTerrain::renderUI() {
 	ImGui::SetNextWindowSize(ImVec2(400, 600), ImGuiCond_Once);
 	ImGui::Begin("Terrain Settings", 0);
 
-	ImGui::SliderFloat("Max Height", &t_settings.max_height, 0.20, 2.0);
-	ImGui::SliderFloat("Min Height", &t_settings.min_height, 0.0f, 1.0f);
-	ImGui::SliderFloat("Amplitude", &t_settings.amplitude, 0.01f, 3.0f);
-	ImGui::Checkbox("Use procedural texturing", &useTexturing);
-	//ImGui::Checkbox("Use faked lighting", &useFakedLighting);
-
 	if (ImGui::SliderFloat3("Terrain Scale", value_ptr(t_settings.model_scale), 1.0f, 20.0f)) {
 		t_mesh.updateTransformCentered(t_settings.model_scale);
 	}
+
+	ImGui::SliderFloat("Amplitude", &t_settings.amplitude, 0.01f, 3.0f);
+	ImGui::Checkbox("Use texturing", &useTexturing);
+	//ImGui::SliderFloat("Max Height", &t_settings.max_height, 0.20, 2.0);
+	ImGui::SliderFloat("Min Height", &t_settings.min_height, 0.0f, 1.0f);
+	//ImGui::Checkbox("Use faked lighting", &useFakedLighting);
 
 	if (ImGui::SliderInt("Plane Subdivisions", &plane_subs, 64, 1024)) {
 		changePlaneSubdivision(plane_subs);
 	}
 
 	if (water_plane && ImGui::SliderFloat("Sea Level", &t_settings.sea_level, 0.0f, 5.0f)) {
-		water_plane->update_transform(vec3(DEFAULT_TERRAIN_SCALE), t_settings.sea_level);
+		water_plane->update_transform(vec3(t_settings.model_scale), t_settings.sea_level);
 	}
 
 	ImGui::Text("Texturing settings");
 	ImGui::SliderFloat("Min Rock Slope", &t_settings.min_rock_slope, 0.0f, t_settings.max_grass_slope-0.001f);
 	ImGui::SliderFloat("Max Grass Slope", &t_settings.max_grass_slope, 0.0f, 1.0f);
 
-	t_noise.makeEditUI();
+	ImGui::Separator();
+
+	if (ImGui::CollapsingHeader("Noise settings", ImGuiTreeNodeFlags_DefaultOpen)) {
+		t_noise.makeEditUI();
+	}
 
 	ImGui::Separator();
 

@@ -12,7 +12,7 @@ namespace Terrain {
 		float max_height = 1.0f; // Max height of the terrain
 		float min_height = 0.0; // Min height of the terrain
 		float amplitude = 1.0f; // Amplitude of the height generation
-		float sea_level = 1.0f; // The y level to draw the water plane at
+		float sea_level = 0.0f; // The y level to draw the water plane at
 
 		glm::vec3 model_scale = glm::vec3(10.0f, 5.0f, 10.0f); // The scale of the terrain
 
