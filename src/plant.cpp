@@ -11,8 +11,8 @@
 using namespace plant;
 using namespace glm;
 
-Plant::Plant(std::string seed, lsystem::ruleset ruleset, int steps, GLuint trunk_shader, GLuint canopy_shader)
-	: trunk{}, canopy{}, trunk_shader{trunk_shader}, canopy_shader{canopy_shader}, ruleset{ruleset}, seed{seed}, current{seed} {
+Plant::Plant(std::string seed, GLuint trunk_shader, GLuint canopy_shader, lsystem::ruleset ruleset, int steps)
+	: trunk{trunk_shader}, canopy{canopy_shader}, ruleset{ruleset}, seed{seed}, current{seed} {
 	grow(steps);
 }
 
@@ -79,24 +79,30 @@ void Plant::recalculate_mesh() {
 		}
 	}
 
-	trunk = trunk_mb.build();
-	canopy = canopy_mb.build();
+	trunk.mesh = trunk_mb.build();
+	canopy.mesh = canopy_mb.build();
 }
 
-void Plant::draw(const glm::mat4 &modelTransform, const glm::mat4 &view, const glm::mat4 proj) {
-	mat4 modelview = view * modelTransform;
-	
-	glUseProgram(trunk_shader); // load shader and variables
-	glUniformMatrix4fv(glGetUniformLocation(trunk_shader, "uProjectionMatrix"), 1, false, value_ptr(proj));
-	glUniformMatrix4fv(glGetUniformLocation(trunk_shader, "uModelViewMatrix"), 1, false, value_ptr(modelview));
-	glUniform3fv(glGetUniformLocation(trunk_shader, "uColor"), 1, value_ptr(vec3 {0.8, 0.2, 0.0}));
+// - mesh
+Mesh::Mesh() : mesh{}, shader{0}, modelTransform{1} {}
 
-	trunk.draw();
+Mesh::Mesh(GLuint shader) : mesh{}, shader{shader}, modelTransform{1} {}
 
-	glUseProgram(canopy_shader); // load shader and variables
-	glUniformMatrix4fv(glGetUniformLocation(canopy_shader, "uProjectionMatrix"), 1, false, value_ptr(proj));
-	glUniformMatrix4fv(glGetUniformLocation(canopy_shader, "uModelViewMatrix"), 1, false, value_ptr(modelview));
-	glUniform3fv(glGetUniformLocation(canopy_shader, "uColor"), 1, value_ptr(vec3 {0.4, 1.0, 0.2}));
+GLuint Mesh::getShader() {
+	return shader;
+}
 
-	canopy.draw();
+mat4 Mesh::getModelTransform() {
+	return modelTransform;
+}
+
+void Mesh::setProjViewUniforms(const glm::mat4& view, const glm::mat4& proj) const {
+	glUseProgram(shader);
+	glUniformMatrix4fv(glGetUniformLocation(shader, "uProjectionMatrix"), 1, false, value_ptr(proj));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "uModelViewMatrix"), 1, false, value_ptr(view * modelTransform));
+}
+
+void Mesh::draw() {
+	// TODO: textures or whatever
+	mesh.draw();
 }
