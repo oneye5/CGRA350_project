@@ -119,7 +119,7 @@ namespace Terrain {
 			std::printf("\n"); // Add a newline for separation
 			std::printf("\t.cellular_dist_function = %s,\n", cellular_dist_str);
 			std::printf("\t.cellular_return_type = %s,\n", cellular_return_str);
-			std::printf("\t.cellular_jitter = %gf\n", cellular_jitter); // Last one shouldn't have a trailing comma
+			std::printf("\t.cellular_jitter = %gf,\n", cellular_jitter); // Last one shouldn't have a trailing comma
 
 			// Domain warp
 			std::printf("\t.domain_warp_type = %s,\n", domain_warp_type_str);
@@ -218,11 +218,35 @@ namespace Terrain {
 			.domain_frequency = 0.034f,
 		};
 
+		// Using a larger amplitude helps
+		static constexpr NoiseSettings funnyRidges = NoiseSettings{
+			.seed = 1337,
+			.frequency = 0.005f,
+			.noise_type = FastNoiseLite::NoiseType_Perlin,
+			.noise_exp = 1.0f,
+
+			.fractal_type = FastNoiseLite::FractalType_Ridged,
+			.fractal_octaves = 5,
+			.fractal_lacunarity = 1.47f,
+			.fractal_gain = 0.41f,
+			.fractal_weighted_strength = 0.43f,
+			.fractal_pingpong_strength = 2.0f,
+
+			.cellular_dist_function = FastNoiseLite::CellularDistanceFunction_EuclideanSq,
+			.cellular_return_type = FastNoiseLite::CellularReturnType_Distance,
+			.cellular_jitter = 1.0f,
+			.domain_warp_type = FastNoiseLite::DomainWarpType_OpenSimplex2,
+			.domain_warp_amp = 1.0f,
+			.domain_seed = 1337,
+			.domain_frequency = 0.005f,
+		};
+
 		const std::map<const char*, NoiseSettings> NOISE_PRESET_MAP = {
 			{"Test Settings 1", testSettings1},
 			{"Cellular Hills", cellularHills},
 			{"Flat Hills", flatHills},
-			{"lots O Circles (Domain Warp)", lotsOCircles}
+			{"lots O Circles (Domain Warp)", lotsOCircles},
+			{"Funny Ridges", funnyRidges}
 		};
 	}
 }
