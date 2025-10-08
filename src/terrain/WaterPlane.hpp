@@ -21,6 +21,10 @@ namespace Terrain {
 
 		void update_transform(glm::vec3 model_scale, float sea_level);
 
+		// For testing shader things
+		float metallic = 0.5f;
+		float smoothness = 0.77f;
+
 		// Renderable methods
 		GLuint getShader() override;
 		void setProjViewUniforms(const glm::mat4 &view, const glm::mat4 &proj) const override;

@@ -29,6 +29,10 @@ in VertexData {
 
 uniform sampler2D water_texture;
 const float TEXTURE_SCALAR = 5.0f; // Don't just want the single texture for entire thing so repreat
+
+uniform float metallic;
+uniform float smoothness;
+
 void writeRenderInfo(MaterialData m) {
     if (uRenderMode == 0) { // voxel
         // center the voxel grid around uVoxelCenter
@@ -59,6 +63,7 @@ void writeRenderInfo(MaterialData m) {
         gEmissive = vec4(m.emi * m.emiFac, 0);
     }
 }
+
 void main() {
 	MaterialData m;
 
@@ -68,8 +73,8 @@ void main() {
 	m.nrm = f_in.normal;
 	m.alb = tex_col;
 	m.emi = vec3(0.0);
-	m.mtl = 0.7;
-	m.smoothness = 0.7;
+	m.mtl = metallic;
+	m.smoothness = smoothness;
 	m.emiFac = 0.0;
 
 	writeRenderInfo(m);
