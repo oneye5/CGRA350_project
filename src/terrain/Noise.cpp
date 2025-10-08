@@ -41,6 +41,17 @@ void Noise::makeEditUI(bool use_own_window) {
 		ImGui::Begin("Noise", 0);
 	}
 
+	static const char* preset = "N/A";
+	if (ImGui::BeginCombo("Noise Presets", "N/A", ImGuiComboFlags_NoPreview)) {
+		for (const auto& p: Presets::NOISE_PRESET_MAP) {
+			if (ImGui::Selectable(p.first, false)) {
+				setNoiseSettings(p.second);
+			}
+		}
+
+		ImGui::EndCombo();
+	}
+
 	int w = width;
 	if (ImGui::SliderInt("Texture size (square)", &w, 64, 1024)) {
 		changeTextureSize(w, w);
@@ -224,7 +235,6 @@ void Noise::generateHeightmap(bool update_pixels) {
 	}
 }
 
-// TODO - check this isn't slow as hell
 void Noise::updateNoiseFromSettings() {
 	noise.SetSeed(settings.seed);
 	noise.SetFrequency(settings.frequency);

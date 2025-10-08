@@ -145,5 +145,55 @@ namespace Terrain {
 			.cellular_return_type = FastNoiseLite::CellularReturnType_Distance,
 			.cellular_jitter = 1.0f
 		};
+
+		static constexpr NoiseSettings cellularHills = NoiseSettings{
+			.seed = 1337,
+			.frequency = 0.016f,
+			.noise_type = FastNoiseLite::NoiseType_Cellular,
+			.noise_exp = 1.0f,
+
+			.fractal_type = FastNoiseLite::FractalType_None,
+			.fractal_octaves = 3,
+			.fractal_lacunarity = 2.0f,
+			.fractal_gain = 0.5f,
+			.fractal_weighted_strength = 0.0f,
+			.fractal_pingpong_strength = 2.0,
+
+			.cellular_dist_function = FastNoiseLite::CellularDistanceFunction_Manhattan,
+			.cellular_return_type = FastNoiseLite::CellularReturnType_CellValue,
+			.cellular_jitter = 1.0f,
+			.domain_warp_type = FastNoiseLite::DomainWarpType_OpenSimplex2,
+			.domain_warp_amp = 1.0f,
+			.domain_seed = 1337,
+			.domain_frequency = 0.005f,
+		};
+
+		static constexpr NoiseSettings flatHills = NoiseSettings{
+			.seed = 1337,
+			.frequency = 0.026f,
+			.noise_type = FastNoiseLite::NoiseType_Perlin,
+			.noise_exp = 1.0f,
+
+			.fractal_type = FastNoiseLite::FractalType_Ridged,
+			.fractal_octaves = 3,
+			.fractal_lacunarity = 0.71f,
+			.fractal_gain = 1.51f,
+			.fractal_weighted_strength = 0.0f,
+			.fractal_pingpong_strength = 2.0f,
+
+			.cellular_dist_function = FastNoiseLite::CellularDistanceFunction_Manhattan,
+			.cellular_return_type = FastNoiseLite::CellularReturnType_CellValue,
+			.cellular_jitter = 1.0f,
+			.domain_warp_type = FastNoiseLite::DomainWarpType_OpenSimplex2,
+			.domain_warp_amp = 1.0f,
+			.domain_seed = 1337,
+			.domain_frequency = 0.005f,
+		};
+
+		const std::map<const char*, NoiseSettings> NOISE_PRESET_MAP = {
+			{"Test Settings 1", testSettings1},
+			{"Cellular Hills", cellularHills},
+			{"Flat Hills", flatHills}
+		};
 	}
 }
