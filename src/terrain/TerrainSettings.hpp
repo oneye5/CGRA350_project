@@ -190,10 +190,34 @@ namespace Terrain {
 			.domain_frequency = 0.005f,
 		};
 
+		static constexpr NoiseSettings lotsOCircles = NoiseSettings{
+			.seed = 1337,
+			.frequency = 0.018f,
+			.noise_type = FastNoiseLite::NoiseType_Perlin,
+			.noise_exp = 1.0f,
+
+			.fractal_type = FastNoiseLite::FractalType_FBm,
+			.fractal_octaves = 3,
+			.fractal_lacunarity = 0.39f,
+			.fractal_gain = 1.39f,
+			.fractal_weighted_strength = 0.2f,
+			.fractal_pingpong_strength = 2.0f,
+
+			.cellular_dist_function = FastNoiseLite::CellularDistanceFunction_EuclideanSq,
+			.cellular_return_type = FastNoiseLite::CellularReturnType_Distance,
+			.cellular_jitter = 1.0f,
+			.use_domain_warp = true,
+			.domain_warp_type = FastNoiseLite::DomainWarpType_OpenSimplex2Reduced,
+			.domain_warp_amp = 123.0f,
+			.domain_seed = 1337,
+			.domain_frequency = 0.034f,
+		};
+
 		const std::map<const char*, NoiseSettings> NOISE_PRESET_MAP = {
 			{"Test Settings 1", testSettings1},
 			{"Cellular Hills", cellularHills},
-			{"Flat Hills", flatHills}
+			{"Flat Hills", flatHills},
+			{"lots O Circles (Domain Warp)", lotsOCircles}
 		};
 	}
 }
