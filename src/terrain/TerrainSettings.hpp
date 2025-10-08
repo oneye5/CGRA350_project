@@ -26,12 +26,17 @@ namespace Terrain {
 		FastNoiseLite::CellularReturnType cellular_return_type = FastNoiseLite::CellularReturnType_Distance; // Value that cellular function returns
 		float cellular_jitter = 1.0f; // Maximum distance a cellular point can move from grid pos
 
-		// Domain warp settings (NOTE - i think i might be missing a few like fractal type)
+		// Domain warp settings
 		bool use_domain_warp = false; // Whether or not to use domain warp
 		FastNoiseLite::DomainWarpType domain_warp_type = FastNoiseLite::DomainWarpType_OpenSimplex2; // domain warp algorithm
 		float domain_warp_amp = 1.0f; // Max warp distance from original pos
 		int domain_seed = 1337;
 		float domain_frequency = 0.005f;
+		// Domain Fractal settings
+		FastNoiseLite::FractalType domain_warp_fractal_type = FastNoiseLite::FractalType_None;
+		int domain_fractal_octaves = 3;
+		float domain_fractal_lacunarity = 2.0f;
+		float domain_fractal_gain = 0.5f;
 
 		// Print out settings in struct form to stdout
 		// TODO - add domain warp stuff
