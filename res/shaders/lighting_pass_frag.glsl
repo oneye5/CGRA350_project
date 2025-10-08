@@ -1,4 +1,4 @@
-﻿#version 440
+#version 440
 in vec2 texCoord;
 out vec4 FragColor;
 
@@ -27,10 +27,13 @@ uniform vec3  uAmbientColor;
 uniform int uDebugIndex;
 uniform float uReflectionBlendLowerBound;
 uniform float uReflectionBlendUpperBound;
+uniform vec3 uHorizonColor;
+uniform vec3 uZenithColor;
+uniform bool uToneMapEnable;
 
 const float PI = 3.14159265359;
 #define APERTURE_SCALE 1.0
-
+#define REFLECTION_RANDOM_STR 0.05
 /*
     FEATURES:
     Emissive based specular for rough materials, geometry based reflections for smooth, with smooth blending between the two
@@ -42,8 +45,19 @@ const float PI = 3.14159265359;
     Fresnel
 
     Metallics
+
+    Filmic tone mapping
 */  
 
+float fastRand(float seed) {
+    return fract(sin(seed * 12.9898) * 43758.5453);
+}
+
+
+vec3 toneMapFilmic(vec3 color) {
+    color = max(vec3(0.0), color - 0.004);
+    return (color * (6.2 * color + 0.5)) / (color * (6.2 * color + 1.7) + 0.06);
+}
 
 vec3 worldToVoxel(vec3 pos) {
     return (pos - uVoxelCenter + uVoxelWorldSize * 0.5) / uVoxelWorldSize;
@@ -137,6 +151,11 @@ vec4 traceCone(vec3 origin, vec3 direction, float aperture, bool stopAtFirstHit)
     return vec4(accumulatedColor, 1.0 - accumulatedAlpha);
 }
 
+vec3 getSkyColor(vec3 viewDir) {
+    float t = smoothstep(0.0, 1.0, viewDir.y);
+    return mix(uHorizonColor, uZenithColor, t);
+}
+
 // Version of above that traces against all geometry instead of just emissives. This is used for reflections of the geometry. 
 vec4 traceConeAgainstGeometry(vec3 origin, vec3 direction, float aperture) {
     vec3 accumulatedColor = vec3(0.0);
@@ -168,7 +187,7 @@ vec4 traceConeAgainstGeometry(vec3 origin, vec3 direction, float aperture) {
 
             accumulatedColor = voxelRadiance;
             accumulatedAlpha = 1.0;
-            break;
+            return vec4(accumulatedColor, 1.0 - accumulatedAlpha);
         }
 
         if (accumulatedAlpha > (1.0 - uTransmittanceNeededForConeTermination))
@@ -177,7 +196,7 @@ vec4 traceConeAgainstGeometry(vec3 origin, vec3 direction, float aperture) {
         distance += coneDiameter * uStepMultiplier;
     }
 
-    return vec4(accumulatedColor, 1.0 - accumulatedAlpha);
+    return vec4(getSkyColor(direction), 0);
 }
 
 
@@ -207,6 +226,8 @@ vec4 indirectDiffuseLight(vec3 pos, vec3 normal) {
     return accumulatedResult / float(numSamples);
 }
 
+
+
 void main() {
     // read g buffer
     vec3 worldPos = texture(gBufferPosition, texCoord).xyz;
@@ -220,7 +241,14 @@ void main() {
 
     // debug and early exit cases
     if (debugPass(worldPos, metallic, worldNormal, smoothness, albedo, emissiveFactor, emissiveRgb, spare) == 1) return;
-    if (length(worldNormal) < 0.1) { FragColor = vec4(albedo, 1.0); return; }
+    if (length(worldNormal) < 0.1) { // SKY CASE, no geometry hit, so fragment = sky color
+        // reconstruct view ray from screen space
+        vec2 ndc = texCoord * 2.0 - 1.0; // convert from 0 : 1  to -1 : 1
+        vec3 viewRayDir = normalize(vec3(ndc.x, ndc.y, -1.0));
+        // transform from view space to world space
+        vec3 worldViewDir = normalize(mat3(inverse(uViewMatrix)) * viewRayDir);
+        FragColor = vec4(getSkyColor(worldViewDir), 1); return;
+    }
     if (emissiveFactor > uEmissiveThreshold) { FragColor = vec4(emissiveRgb * emissiveFactor, 1.0); return; }
 
     // setup vars
@@ -240,13 +268,13 @@ void main() {
 
     // calculate specular and reflections
     vec3 reflectDir = reflect(-viewDir, worldNormal);
-    // aperture based on roughness squared (physically accurate)
+    // aperture based on roughness squared 
     float specularAperture = roughness * roughness * APERTURE_SCALE;
     specularAperture = clamp(specularAperture, 0.001, 0.5);
     vec3 indirectGeometryResult = vec3(0);
     vec3 indirectSpecularResult = traceCone(traceOrigin, reflectDir, specularAperture, false).xyz;
     if (smoothness >= uReflectionBlendLowerBound) // optimization for when the result is not used
-        indirectGeometryResult = traceConeAgainstGeometry(traceOrigin, reflectDir, 0.1).xyz;
+        indirectGeometryResult = traceConeAgainstGeometry(traceOrigin, reflectDir, 0.05 + fastRand(traceOrigin.x + traceOrigin.y + traceOrigin.z) * REFLECTION_RANDOM_STR).xyz; // randomness to avoid blocky reflections
     float blendFactor = smoothstep(uReflectionBlendLowerBound, uReflectionBlendUpperBound, smoothness);
     vec3 indirectSpecular = mix(indirectSpecularResult.rgb, indirectGeometryResult.rgb * 1.5, blendFactor); // blends between specular highlight and reflection, bit of a hack
 
@@ -256,5 +284,7 @@ void main() {
     vec3 globalIllumination = (diffuseGI * uDiffuseBrightnessMultiplier) + specularGI;
     vec3 ambient = uAmbientColor * albedo * ambientOcclusion;
     vec3 finalColor = globalIllumination + ambient + indirectSpecular;
+    if (uToneMapEnable)
+        finalColor = toneMapFilmic(finalColor);
     FragColor = vec4(finalColor, 1.0);
 }

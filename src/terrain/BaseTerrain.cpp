@@ -28,8 +28,7 @@ BaseTerrain::BaseTerrain() : t_erosion(t_noise.width, t_noise.height) {
 	sb.set_shader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//terrain//basic_terrain.fs"));
 	shader = sb.build();
 
-	t_mesh.init_transform = glm::translate(glm::mat4(1), glm::vec3(-5,0,-5));
-	t_mesh.init_transform = glm::scale(t_mesh.init_transform, glm::vec3(DEFAULT_TERRAIN_SCALE, DEFAULT_TERRAIN_SCALE / 2, DEFAULT_TERRAIN_SCALE));
+	t_mesh.updateTransformCentered(t_settings.model_scale);
 	loadTextures();
 
 	// Set up the texture uniforms cuz only need to do once
@@ -40,7 +39,6 @@ BaseTerrain::BaseTerrain() : t_erosion(t_noise.width, t_noise.height) {
 	glUniform1i(glGetUniformLocation(shader, "grass_texture"), 3);
 	glUniform1i(glGetUniformLocation(shader, "rock_texture"), 4);
 	glUniform1i(glGetUniformLocation(shader, "snow_texture"), 5);
-
 }
 
 void BaseTerrain::setProjViewUniforms(const glm::mat4 &view, const glm::mat4 &proj) const {
@@ -69,6 +67,8 @@ void BaseTerrain::draw() {
 
 	glUniform1f(glGetUniformLocation(shader, "min_rock_slope"), t_settings.min_rock_slope);
 	glUniform1f(glGetUniformLocation(shader, "max_grass_slope"), t_settings.max_grass_slope);
+
+	glUniform1f(glGetUniformLocation(shader, "terrain_size_scalar"), t_settings.model_scale.x);
 	
 	glActiveTexture(GL_TEXTURE0);
 	// glUniform1i(glGetUniformLocation(shader, "heightMap"), 0);
@@ -103,37 +103,58 @@ void BaseTerrain::changePlaneSubdivision(int subs) {
 // with provided subdivisions
 static PlaneTerrain CreateBasicPlane(int x_sub, int z_sub) {
 	PlaneTerrain plane;
-	cgra::mesh_builder mb = cgra::CREATE_PLANE(x_sub, z_sub);
+	cgra::mesh_builder mb = cgra::CREATE_PLANE(x_sub, z_sub, 2.0f);
 	
 	plane.mesh = mb.build();
 	return plane;
 }
 
+void PlaneTerrain::updateTransformCentered(vec3 scale) {
+	mat4 m_scale = glm::scale(mat4(1.0f), scale);
+	vec3 translation = vec3(-2.0f - (scale.x/2.0f), 0, -2.0f - (scale.z/2.0f));
+	mat4 m_translation = glm::translate(mat4(1.0f), translation);
+	init_transform = m_translation * m_scale;
+}
+
 void BaseTerrain::renderUI() {
 	
-	ImGui::SetNextWindowPos(ImVec2(5, 200), ImGuiCond_Once);
+	ImGui::SetNextWindowPos(ImVec2(5, 350), ImGuiCond_Once);
 	ImGui::SetNextWindowSize(ImVec2(400, 600), ImGuiCond_Once);
 	ImGui::Begin("Terrain Settings", 0);
 
-	ImGui::SliderFloat("Max Height", &t_settings.max_height, 0.20, 2.0);
-	ImGui::SliderFloat("Min Height", &t_settings.min_height, 0.0f, 1.0f);
+	if (ImGui::SliderFloat3("Terrain Scale", value_ptr(t_settings.model_scale), 1.0f, 20.0f)) {
+		t_mesh.updateTransformCentered(t_settings.model_scale);
+	}
+
 	ImGui::SliderFloat("Amplitude", &t_settings.amplitude, 0.01f, 3.0f);
-	ImGui::Checkbox("Use procedural texturing", &useTexturing);
-	ImGui::Checkbox("Use faked lighting", &useFakedLighting);
+	ImGui::Checkbox("Use texturing", &useTexturing);
+	//ImGui::SliderFloat("Max Height", &t_settings.max_height, 0.20, 2.0);
+	//ImGui::SliderFloat("Min Height", &t_settings.min_height, 0.0f, 1.0f);
+	//ImGui::Checkbox("Use faked lighting", &useFakedLighting);
 
 	if (ImGui::SliderInt("Plane Subdivisions", &plane_subs, 64, 1024)) {
 		changePlaneSubdivision(plane_subs);
 	}
 
 	if (water_plane && ImGui::SliderFloat("Sea Level", &t_settings.sea_level, 0.0f, 5.0f)) {
-		water_plane->update_transform(vec3(DEFAULT_TERRAIN_SCALE), t_settings.sea_level);
+		water_plane->update_transform(vec3(t_settings.model_scale), t_settings.sea_level);
 	}
 
 	ImGui::Text("Texturing settings");
 	ImGui::SliderFloat("Min Rock Slope", &t_settings.min_rock_slope, 0.0f, t_settings.max_grass_slope-0.001f);
 	ImGui::SliderFloat("Max Grass Slope", &t_settings.max_grass_slope, 0.0f, 1.0f);
 
-	t_noise.makeEditUI();
+	if (water_plane) {
+		ImGui::Text("Test water settings");
+		ImGui::SliderFloat("Water metallicness", &water_plane->metallic, 0.0f, 1.0f);
+		ImGui::SliderFloat("Water smoothness", &water_plane->smoothness, 0.0f, 1.0f);
+	}
+
+	ImGui::Separator();
+
+	if (ImGui::CollapsingHeader("Noise settings", ImGuiTreeNodeFlags_DefaultOpen)) {
+		t_noise.makeEditUI();
+	}
 
 	ImGui::Separator();
 
@@ -157,6 +178,8 @@ void BaseTerrain::renderUI() {
 		}
 	} else {
 		ImGui::Text("Erosion sim running..");
+		float fraction = static_cast<float>(t_erosion.iterations_ran) / static_cast<float>(t_erosion.settings.iterations);
+		ImGui::ProgressBar(fraction, ImVec2(0.0f, 0.0f));
 		ImGui::Text("Currently on iteration %d / %d", t_erosion.iterations_ran, t_erosion.settings.iterations);
 		if (ImGui::Button("Abort")) {
 			erosion_running = false;

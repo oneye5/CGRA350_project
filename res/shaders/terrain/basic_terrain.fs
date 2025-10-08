@@ -178,7 +178,7 @@ void main() {
 	m.alb = col;
 	m.emi = vec3(0.0);
 	m.mtl = 0.0; // TODO - tweak these later, probs based on texture
-	m.smoothness = 0.1;
+	m.smoothness = 0.0;
 	m.emiFac = 0.0;
 
 	writeRenderInfo(m);
