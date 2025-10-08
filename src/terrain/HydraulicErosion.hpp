@@ -23,7 +23,7 @@ namespace Terrain {
 		float capacity_s = 4.0f; // Sediment capacity (P_capacity)
 		float min_slope = 0.01f;   // Minimum sediment capacity (Algorithm calls it P_minslope)
 		float evaporate_speed = 0.01f;   // How fast water evaporates (0-1)
-		float deposition = 0.3f;      // How fast sediment is deposited (0-1)
+		float deposit_speed = 0.3f;      // How fast sediment is deposited (0-1)
 		float erode_speed = 0.3f;        // How fast erosion happens (0-1) (P_erosion)
 		float gravity = 9.81f;           // Strength of gravity
 		float start_velocity = 1.0f;        // Initial droplet speed
