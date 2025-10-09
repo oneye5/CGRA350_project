@@ -41,7 +41,7 @@ void Plant::recalculate_mesh() {
 	cgra::mesh_builder trunk_mb;
 	trunk_mb.mode = GL_LINES;
 	cgra::mesh_builder canopy_mb;
-	canopy_mb.mode = GL_LINES;
+	canopy_mb.mode = GL_POINTS;
 
 	float step = 1;
 	static float angle = 0.3;
@@ -54,14 +54,18 @@ void Plant::recalculate_mesh() {
 	};
 	std::vector<float> steps;
 	std::vector<stackItem> stack = {};
-	std::cout <<"Calculating for " << current << "\n";
 	for (const auto &c: current) {
 		switch (c) {
 			case 'A': // To-grow
-				canopy_mb.push_index(canopy_mb.push_vertex({trans * vec4{0,0,0,1}, {0,0,1}}));
-				trans = translate(trans, {0, size/2.0, 0});
-				canopy_mb.push_index(canopy_mb.push_vertex({{trans * vec4{0,0,0,1}}, {0,0,1}}));
-				size *= 0.8;
+				{
+					vec4 a = trans * vec4{0,0,0,1};
+					trans = translate(trans, {0, size/2.0, 0});
+					vec4 b = trans * vec4{0,0,0,1};
+					vec4 norm = normalize(b-a);
+					canopy_mb.push_index(canopy_mb.push_vertex({trans * vec4{0,0,0,1}, vec3{norm}}));
+					// canopy_mb.push_index(canopy_mb.push_vertex({{trans * vec4{0,0,0,1}}, {0,0,1}}));
+					size *= 0.8;
+				}
 
 				break;
 			case 'F': // Permanent growth
