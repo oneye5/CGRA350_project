@@ -58,12 +58,29 @@ void main() {
 	// float y_pos = max_height * height;
 	float y_pos = (draw_from_min) ? height - min_height : height;
 
+	// Push edge vertices down to y=0.0 to prevent the open ended sides (not the best implementation but whatev)
+	bool isEdgeVertex = (aTexCoord.x <= 0.001 || aTexCoord.x >= 0.999 ||
+						 aTexCoord.y <= 0.001 || aTexCoord.y >= 0.999);
+	if (isEdgeVertex) {
+		y_pos = 0.0; // Push way down
+	}
+
 	vec3 pos = vec3(aPosition.x, y_pos, aPosition.z);
 	v_out.position = (uModelMatrix * vec4(pos, 1.0)).xyz; // Use world normal
 	mat4 modelView = uViewMatrix * uModelMatrix;
 
 	// calcualte world space normal
 	vec3 world_normal = calculateNormal(aTexCoord);
+	if (isEdgeVertex) {
+		// Kinda evil method but it saves me like 4 extra if statements
+	    vec2 centered_coord = (aTexCoord - 0.5) * 2.0;
+    
+		if (abs(centered_coord.x) > abs(centered_coord.y)) {
+			world_normal = vec3(sign(centered_coord.x), 0.0, 0.0);
+		} else {
+			world_normal = vec3(0.0, 0.0, sign(centered_coord.y));
+		}
+	}
 	mat3 normalMatrix = transpose(inverse(mat3(uModelMatrix)));
 	v_out.normal = normalize(normalMatrix * world_normal);
 	v_out.textureCoord = aTexCoord;
