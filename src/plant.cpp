@@ -13,6 +13,7 @@ using namespace plant;
 using namespace glm;
 
 KnownPlants plant::known_plants;
+bool planttt = true;
 
 Plant::Plant(std::string seed, GLuint trunk_shader, GLuint canopy_shader, lsystem::ruleset ruleset, int steps) :
 	ruleset{ruleset},
@@ -159,5 +160,6 @@ void Mesh::setProjViewUniforms(const glm::mat4& view, const glm::mat4& proj) con
 
 void Mesh::draw() {
 	// TODO: textures or whatever
+	if (!planttt) return;
 	mesh.draw();
 }

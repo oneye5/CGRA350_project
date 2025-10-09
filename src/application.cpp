@@ -30,6 +30,8 @@ using namespace std;
 using namespace cgra;
 using namespace glm;
 
+
+extern bool planttt ;
 glm::vec3 lightPos;
 glm::vec3 lightScale;
 bool dirtyVoxels = true;
@@ -297,6 +299,10 @@ void Application::renderGUI() {
 	ImGui::SliderFloat("Pitch", &m_pitch, -pi<float>() / 2, pi<float>() / 2, "%.2f");
 	ImGui::SliderFloat("Yaw", &m_yaw, -pi<float>(), pi<float>(), "%.2f");
 	ImGui::DragFloat3("Camera Position", &m_cameraPosition[0], 0.1f);
+	ImGui::Separator();
+	if (ImGui::Checkbox("Plant", &planttt)) {
+		dirtyVoxels = true;
+	}
 	ImGui::Separator();
 
 	if (ImGui::SliderFloat3("Light pos", &lightPos[0], -20, 20)) { light->modelTransform = glm::translate(glm::mat4(1), lightPos); light->modelTransform = glm::scale(light->modelTransform, vec3(lightScale)); }
