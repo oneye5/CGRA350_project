@@ -18,6 +18,10 @@ namespace Terrain {
 
 		float min_rock_slope = 0.95f; // The min slope for rock texturing (0-1)
 		float max_grass_slope = 1.0f; // The max slope for grass texturing (0-1)
+
+		bool use_triplanar_mapping = true;
+		float tex_base_scalar = 8.0f; // The scale to apply to the uv coordinates for texture mapping
+		float triplanar_sharpness = 4.0f; // Sharpness of the triplanar blending
 	};
 
 	struct PlaneTerrain {
@@ -51,11 +55,11 @@ namespace Terrain {
 		bool erosion_running = false; // Whether or not the erosion sim is currently running (in real-time)
 
 		bool useTexturing = true;
-		GLuint texture1; // The first texture, bottom most (default water)
-		GLuint texture2; // The second texture (default sand)
-		GLuint texture3; // Third texture (default dirt)
-		GLuint texture4; // Forth texture (default rock)
-		GLuint texture5; // Fifth texture (default snow)
+		GLuint water_texture; // The first texture, bottom most (default water)
+		GLuint sand_texture; // The second texture (default sand)
+		GLuint dirt_texture; // Third texture (default dirt)
+		GLuint rock_texture; // Forth texture (default rock)
+		GLuint snow_texture; // Fifth texture (default snow)
 
 		WaterPlane* water_plane = nullptr; // The water plane (passed as pointer so renderer can draw it and terrain can set settings)
 

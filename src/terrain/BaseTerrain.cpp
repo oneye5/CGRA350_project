@@ -70,6 +70,9 @@ void BaseTerrain::draw() {
 	glUniform1f(glGetUniformLocation(shader, "max_grass_slope"), t_settings.max_grass_slope);
 
 	glUniform1f(glGetUniformLocation(shader, "terrain_size_scalar"), t_settings.model_scale.x);
+	glUniform1i(glGetUniformLocation(shader, "use_triplanar_mapping"), t_settings.use_triplanar_mapping);
+	glUniform1f(glGetUniformLocation(shader, "tex_base_scalar"), t_settings.tex_base_scalar);
+	glUniform1f(glGetUniformLocation(shader, "triplanar_sharpness"), t_settings.triplanar_sharpness);
 	
 	glActiveTexture(GL_TEXTURE0);
 	// glUniform1i(glGetUniformLocation(shader, "heightMap"), 0);
@@ -77,19 +80,19 @@ void BaseTerrain::draw() {
 
 	// Water
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, texture1);
+	glBindTexture(GL_TEXTURE_2D, water_texture);
 	// Sand
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, texture2);
+	glBindTexture(GL_TEXTURE_2D, sand_texture);
 	// Grass
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, texture3);
+	glBindTexture(GL_TEXTURE_2D, dirt_texture);
 	// Rock
 	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, texture4);
+	glBindTexture(GL_TEXTURE_2D, rock_texture);
 	// Snow
 	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_2D, texture5);
+	glBindTexture(GL_TEXTURE_2D, snow_texture);
 
 	t_mesh.mesh.draw();
 }
@@ -137,6 +140,9 @@ void BaseTerrain::renderUI() {
 	}
 
 	ImGui::Text("Texturing settings");
+	ImGui::Checkbox("Use Triplanar Mapping", &t_settings.use_triplanar_mapping);
+	ImGui::SliderFloat("Triplanar Sharpness", &t_settings.triplanar_sharpness, 0.01f, 4.0f);
+	ImGui::SliderFloat("Texture coordinate scalar (non triplanar)", &t_settings.tex_base_scalar, 1.0f, 20.0f);
 	ImGui::SliderFloat("Min Rock Slope", &t_settings.min_rock_slope, 0.0f, t_settings.max_grass_slope-0.001f);
 	ImGui::SliderFloat("Max Grass Slope", &t_settings.max_grass_slope, 0.0f, 1.0f);
 
@@ -205,11 +211,11 @@ void BaseTerrain::loadTextures() {
 	Textures::rock = cgra::rgba_image(ROCK_PATH).uploadTexture();
 	Textures::snow = cgra::rgba_image(SNOW_PATH).uploadTexture();
 
-	texture1 = Textures::water;
-	texture2 = Textures::sand;
-	texture3 = Textures::grass;
-	texture4 = Textures::rock;
-	texture5 = Textures::snow;
+	water_texture = Textures::water;
+	sand_texture = Textures::sand;
+	dirt_texture = Textures::grass;
+	rock_texture = Textures::rock;
+	snow_texture = Textures::snow;
 }
 
 GLuint BaseTerrain::getShader() {
