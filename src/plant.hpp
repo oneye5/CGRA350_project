@@ -11,6 +11,7 @@ namespace plant {
 		cgra::gl_mesh mesh;
 		GLuint shader;
 		glm::mat4 modelTransform;
+		GLuint alt_vbo;
 
 		Mesh();
 		Mesh(GLuint shader);

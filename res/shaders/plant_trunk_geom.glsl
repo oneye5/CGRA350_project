@@ -12,15 +12,17 @@ uniform int uRenderMode; // 0 = write voxels, 1 = write to gbuffer
 
 in vec3 inWorldPos[];
 in vec3 inNormal[];
+in float sizes[];
 out vec3 worldPos;
 out vec3 normal;
+
 
 // uniform mat4 projection;
 // uniform mat4 view;
 // uniform mat4 model;
 
 // Cylinder radius
-uniform float lineRadius = 0.05;
+uniform float lineRadius = 0.1;
 
 // // Input vertices from vertex shader
 // in vec3 vertexColor[];
@@ -40,6 +42,9 @@ void main() {
     vec3 up = abs(lineDir.y) > 0.9 ? vec3(1, 0, 0) : vec3(0, 1, 0);
     vec3 right = normalize(cross(lineDir, up));
     up = normalize(cross(right, lineDir));
+	float decay = 0.5;
+	float startMult = pow(decay, sizes[0]);
+	float endMult = pow(decay, sizes[1]);
 
     // Generate cylinder vertices
     for (int i = 0; i <= 8; i++) {
@@ -47,13 +52,13 @@ void main() {
         vec3 offset = lineRadius * (right * cos(angle) + up * sin(angle));
 
         // Bottom circle
-        gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(start.xyz + offset, 1.0);
+        gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(start.xyz + (offset * startMult), 1.0);
 		worldPos = inWorldPos[0];
 		normal = normalize(offset);
         EmitVertex();
 
         // Top circle
-        gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(end.xyz + offset, 1.0);
+        gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(end.xyz + (offset * endMult), 1.0);
 		worldPos = inWorldPos[1];
 		normal = normalize(offset);
         EmitVertex();

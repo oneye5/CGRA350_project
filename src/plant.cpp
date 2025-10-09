@@ -1,6 +1,7 @@
 #include "plant.hpp"
 #include "cgra/cgra_mesh.hpp"
 #include "lsystem.hpp"
+#include "opengl.hpp"
 #include <string>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
@@ -51,6 +52,7 @@ void Plant::recalculate_mesh() {
 		float size;
 		float step;
 	};
+	std::vector<float> steps;
 	std::vector<stackItem> stack = {};
 	std::cout <<"Calculating for " << current << "\n";
 	for (const auto &c: current) {
@@ -63,11 +65,13 @@ void Plant::recalculate_mesh() {
 
 				break;
 			case 'F': // Permanent growth
-				trunk_mb.push_index(trunk_mb.push_vertex({{trans * vec4{0,0,0,1}}, {step,0,0}}));
+				trunk_mb.push_index(trunk_mb.push_vertex({{trans * vec4{0,0,0,1}}, {0,0,1}}));
 				trans = translate(trans, {0, size, 0});
-				trunk_mb.push_index(trunk_mb.push_vertex({{trans * vec4{0,0,0,1}}, {step,0,0}}));
-				size *= 0.8;
+				trunk_mb.push_index(trunk_mb.push_vertex({{trans * vec4{0,0,0,1}}, {0,0,1}}));
+				steps.push_back(step);
 				step += 1;
+				steps.push_back(step);
+				size *= 0.8;
 
 				break;
 			case '-': // Rot back Z
@@ -104,6 +108,16 @@ void Plant::recalculate_mesh() {
 
 	trunk.mesh = trunk_mb.build();
 	canopy.mesh = canopy_mb.build();
+
+	glGenBuffers(1, &trunk.alt_vbo);
+	glBindVertexArray(trunk.mesh.vao);
+	glBindBuffer(GL_ARRAY_BUFFER, trunk.alt_vbo);
+	glBufferData(GL_ARRAY_BUFFER, steps.size() * sizeof(float), &steps[0], GL_STATIC_DRAW);
+	// 0, 1, 2 are taken
+	glEnableVertexAttribArray(4);
+	
+	glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(float), (void *)0);
+	glBindVertexArray(0);
 }
 
 std::vector<Plant> plant::create_plants(std::vector<create_plants_input> inputs) {
