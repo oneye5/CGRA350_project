@@ -19,5 +19,5 @@ void main() {
     mat3 normalMatrix = transpose(inverse(mat3(uModelMatrix)));
     inNormal = normalize(normalMatrix * aNormal); 
 
-    gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aPosition, 1.0);
+    gl_Position = /* uProjectionMatrix * uViewMatrix * uModelMatrix */ vec4(aPosition, 1.0);
 }
