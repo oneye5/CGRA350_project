@@ -11,8 +11,15 @@
 using namespace plant;
 using namespace glm;
 
+KnownPlants plant::known_plants;
+
 Plant::Plant(std::string seed, GLuint trunk_shader, GLuint canopy_shader, lsystem::ruleset ruleset, int steps)
 	: trunk{trunk_shader}, canopy{canopy_shader}, ruleset{ruleset}, seed{seed}, current{seed} {
+	grow(steps);
+}
+
+Plant::Plant(PlantData data, int steps)
+	: trunk{data.trunk_shader}, canopy{data.canopy_shader}, ruleset{data.rules}, seed{data.seed}, current{seed} {
 	grow(steps);
 }
 
@@ -81,6 +88,19 @@ void Plant::recalculate_mesh() {
 
 	trunk.mesh = trunk_mb.build();
 	canopy.mesh = canopy_mb.build();
+}
+
+std::vector<Plant> create_plants(std::vector<create_plants_input> inputs) {
+	std::vector<Plant> ret;
+
+	for (auto pt : inputs) {
+		Plant p = Plant(known_plants.tree);
+		p.trunk.modelTransform = translate(p.trunk.modelTransform, pt.pos);
+		p.canopy.modelTransform = translate(p.canopy.modelTransform, pt.pos);
+		ret.push_back(p);
+	}
+
+	return ret;
 }
 
 // - mesh
