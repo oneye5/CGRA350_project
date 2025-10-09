@@ -31,6 +31,9 @@ uniform vec3 uHorizonColor;
 uniform vec3 uZenithColor;
 uniform bool uToneMapEnable;
 uniform float uReflectionAperture;
+uniform float uConeOffset;
+uniform float uAO;
+uniform float uContrast;
 
 const float PI = 3.14159265359;
 #define APERTURE_SCALE 1.0
@@ -49,6 +52,11 @@ const float PI = 3.14159265359;
 
     Filmic tone mapping
 */  
+
+vec3 adjustContrast(vec3 color) {
+    return (color - 0.5) * uContrast + 0.5;
+}
+
 
 float fastRand(float seed) {
     return fract(sin(seed * 12.9898) * 43758.5453);
@@ -260,12 +268,12 @@ void main() {
     float NdotV = max(dot(worldNormal, viewDir), 0.0);
     vec3 F = fresnelSchlickRoughness(NdotV, F0, roughness);
     vec3 kD = (1.0 - F) * (1.0 - metallic);
-    vec3 traceOrigin = worldPos + worldNormal * VOXEL_SIZE * 2.0;
+    vec3 traceOrigin = worldPos + worldNormal * VOXEL_SIZE * uConeOffset;
 
     // calculate indirect lighting
     vec4 indirectDiffuseResult = indirectDiffuseLight(traceOrigin, worldNormal);
     vec3 indirectDiffuse = indirectDiffuseResult.rgb;
-    float ambientOcclusion = indirectDiffuseResult.a;     // the average transmittance from the diffuse cones gives a plausable ambient occlusion term
+    float ambientOcclusion = indirectDiffuseResult.a * uAO;     // the average transmittance from the diffuse cones gives a plausable ambient occlusion term
 
     // calculate specular and reflections
     vec3 reflectDir = reflect(-viewDir, worldNormal);
@@ -287,5 +295,6 @@ void main() {
     vec3 finalColor = globalIllumination + ambient + indirectSpecular;
     if (uToneMapEnable)
         finalColor = toneMapFilmic(finalColor);
+    finalColor = adjustContrast(finalColor);
     FragColor = vec4(finalColor, 1.0);
 }
