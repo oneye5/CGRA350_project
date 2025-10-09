@@ -89,7 +89,7 @@ Application::Application(GLFWwindow* window) : m_window(window) {
 	//renderer->addRenderable(exampleRenderable2);
 
 	// Create some debug plants
-	plants = plant::create_plants({{{0,0,0}}});
+	plants = plant::create_plants({{{0,4,0}}});
 	for (auto& p : plants) {
 		renderer->addRenderable(&p.trunk);
 		renderer->addRenderable(&p.canopy);
