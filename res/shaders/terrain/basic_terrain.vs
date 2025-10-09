@@ -17,13 +17,15 @@ out VertexData {
 } v_out;
 
 uniform float max_height; // TODO - not really needed, might remove later cuz amplitude is better
-uniform float min_height;
 uniform float amplitude;
 uniform sampler2D heightMap; // The heightmap
 
 uniform int subdivisions; // How many subdivisions the plane has (needed for normal calculation)
 uniform float terrain_size_scalar; // The amount the plane gets scaled up by with the model matrix (needed for normal calculation)
 // TODO - separate into vec2 if allowing non square terrain
+
+uniform bool draw_from_min; // whether or not to draw from min height
+uniform float min_height;
 
 // Calculate the normals for a position by sampling neighbouring points
 vec3 calculateNormal(vec2 texCoord) {
@@ -53,8 +55,8 @@ vec3 calculateNormal(vec2 texCoord) {
 void main() {
 	// transform vertex data to viewspace
 	float height = texture(heightMap, aTexCoord).r * amplitude;
-	float y_pos = max_height * height;
-	//y_pos = clamp(y_pos, min_height, max_height);
+	// float y_pos = max_height * height;
+	float y_pos = (draw_from_min) ? height - min_height : height;
 
 	vec3 pos = vec3(aPosition.x, y_pos, aPosition.z);
 	v_out.position = (uModelMatrix * vec4(pos, 1.0)).xyz; // Use world normal
