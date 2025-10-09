@@ -18,9 +18,12 @@
 #include <example_renderable.cpp>
 #include <point_light_renderable.cpp>
 
+#include "opengl.hpp"
 #include "terrain/BaseTerrain.hpp"
 #include "terrain/WaterPlane.hpp"
 
+#include "lsystem.hpp"
+#include "plant.hpp"
 
 using namespace std;
 using namespace cgra;
@@ -30,6 +33,7 @@ Renderer* renderer = nullptr;
 
 PointLightRenderable* light = nullptr;
 Terrain::BaseTerrain* t_terrain = nullptr;
+vector<plant::Plant> plants;
 ExampleRenderable* exampleRenderable = nullptr;
 ExampleRenderable* exampleRenderable2 = nullptr;
 Terrain::WaterPlane* t_water = nullptr;
@@ -42,6 +46,22 @@ Application::Application(GLFWwindow* window) : m_window(window) {
 	glfwGetFramebufferSize(m_window, &width, &height);
 	renderer = new Renderer(width, height);
 
+	// Initialise plant data
+	plant::known_plants.tree.seed = "A";
+	plant::known_plants.tree.rules = {{'A', "F[+A][-A]"}};
+	{
+		cgra::shader_builder sb;
+		sb.set_shader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//plant_trunk_vert.glsl"));
+		sb.set_shader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//plant_trunk_frag.glsl"));
+		plant::known_plants.tree.trunk_shader  = sb.build();
+	}
+	{
+		cgra::shader_builder sb;
+		sb.set_shader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//plant_canopy_vert.glsl"));
+		sb.set_shader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//plant_canopy_frag.glsl"));
+		plant::known_plants.tree.canopy_shader  = sb.build();
+	}
+	//---
 
 	t_terrain = new Terrain::BaseTerrain();
 	t_water = new Terrain::WaterPlane();
@@ -67,6 +87,13 @@ Application::Application(GLFWwindow* window) : m_window(window) {
 	renderer->addRenderable(light);
 	renderer->addRenderable(exampleRenderable);
 	//renderer->addRenderable(exampleRenderable2);
+
+	// Create some debug plants
+	plants = plant::create_plants({{{0,4,0}}});
+	for (auto& p : plants) {
+		renderer->addRenderable(&p.trunk);
+		renderer->addRenderable(&p.canopy);
+	}
 
 	// renderer tweaks based on scene size
 	renderer->voxelizer->setCenter(glm::vec3(-5, 5, -5));
@@ -129,7 +156,6 @@ void Application::render() {
 	mat4 view = rotate(mat4(1), m_pitch, vec3(1, 0, 0))
 		* rotate(mat4(1), m_yaw, vec3(0, 1, 0))
 		* translate(mat4(1), -m_cameraPosition);
-
 
 	if (dirtyVoxels) {
 		renderer->refreshVoxels(view, proj);
@@ -198,6 +224,7 @@ void Application::renderGUI() {
 	if (ImGui::Button("Voxel show albedo as RGB")) { renderer->debug_params.debug_channel_index = 5; }
 	if (ImGui::Button("Voxel show emissive factor as RGB")) { renderer->debug_params.debug_channel_index = 6; }
 
+	// finish creating window
 	ImGui::Separator();
 	ImGui::Checkbox("Gbuffer debug enable", &renderer->debug_params.gbuffer_debug_mode_on);
 	if (ImGui::Button("Gbuffer show position as RGB")) { renderer->debug_params.debug_channel_index = 1; }
@@ -223,6 +250,12 @@ void Application::renderGUI() {
 	ImGui::Begin("Texture preview", 0);
 	ImGui::Image((ImTextureID)(intptr_t)t_terrain->t_noise.texID, ImVec2(tex_prev_size, tex_prev_size));
 	ImGui::End();
+
+	// {{{ LSystem stuff
+	static lsystem::gui::Data ls_data;
+	lsystem::gui::rules_window(ls_data);
+	lsystem::gui::growth_window(ls_data);
+	// }}}
 }
 
 
