@@ -80,19 +80,19 @@ void BaseTerrain::draw() {
 
 	// Water
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, texture1);
+	glBindTexture(GL_TEXTURE_2D, water_texture);
 	// Sand
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, texture2);
+	glBindTexture(GL_TEXTURE_2D, sand_texture);
 	// Grass
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, texture3);
+	glBindTexture(GL_TEXTURE_2D, dirt_texture);
 	// Rock
 	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, texture4);
+	glBindTexture(GL_TEXTURE_2D, rock_texture);
 	// Snow
 	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_2D, texture5);
+	glBindTexture(GL_TEXTURE_2D, snow_texture);
 
 	t_mesh.mesh.draw();
 }
@@ -211,11 +211,11 @@ void BaseTerrain::loadTextures() {
 	Textures::rock = cgra::rgba_image(ROCK_PATH).uploadTexture();
 	Textures::snow = cgra::rgba_image(SNOW_PATH).uploadTexture();
 
-	texture1 = Textures::water;
-	texture2 = Textures::sand;
-	texture3 = Textures::grass;
-	texture4 = Textures::rock;
-	texture5 = Textures::snow;
+	water_texture = Textures::water;
+	sand_texture = Textures::sand;
+	dirt_texture = Textures::grass;
+	rock_texture = Textures::rock;
+	snow_texture = Textures::snow;
 }
 
 GLuint BaseTerrain::getShader() {
