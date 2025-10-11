@@ -1,11 +1,14 @@
 #pragma once
 #include <GL/glew.h>
 #include <glm/detail/type_mat.hpp>
+#include <glm/detail/type_gentype.hpp>
+#include <vector>
 
 
 class Renderable {
 public:
     virtual GLuint getShader() = 0;  // return shader program to use
+    virtual std::vector<GLuint> getShaders() { return std::vector<GLuint> {getShader()}; }; // return shaders, override if more than 1 shader
     
     // all projection, model and view related uniforms should be set here
     virtual void setProjViewUniforms(const glm::mat4& view, const glm::mat4& proj) const = 0;

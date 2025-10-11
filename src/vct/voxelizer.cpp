@@ -203,9 +203,7 @@ void Voxelizer::restoreRenderingState(int width, int height) {
 
 }
 
-void Voxelizer::performVoxelization(std::function<void()> drawMainGeometry,
-    std::vector<glm::mat4> modelTransforms,
-    std::vector<GLuint> usingShaders) {
+void Voxelizer::performVoxelization(std::function<void()> drawMainGeometry, std::vector<glm::mat4> modelTransforms, std::vector<GLuint> usingShaders) {
     mat4 orthoProj = createOrthographicProjection();
     auto views = createOrthographicViews();
 

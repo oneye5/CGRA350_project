@@ -78,14 +78,18 @@ public:
     std::vector<glm::mat4> getModelMatricies() {
         std::vector<glm::mat4> out{};
         for (auto obj : renderables) {
-            out.push_back(obj->getModelTransform());
+            auto shaders = obj->getShaders();
+            for(auto x : shaders)
+                out.push_back(obj->getModelTransform());
         }
         return out;
     }
     std::vector<GLuint> getShaders() {
         std::vector<GLuint> out{};
         for (auto obj : renderables) {
-            out.push_back(obj->getShader());
+            auto shaders = obj->getShaders();
+            for (auto s : shaders) 
+                out.push_back(s);
         }
         return out;
     }
