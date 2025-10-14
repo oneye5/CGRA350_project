@@ -286,6 +286,8 @@ void main() {
         indirectGeometryResult = traceConeAgainstGeometry(traceOrigin, reflectDir, uReflectionAperture + fastRand(traceOrigin.x + traceOrigin.y + traceOrigin.z) * REFLECTION_RANDOM_STR).xyz; // randomness to avoid blocky reflections
     float blendFactor = smoothstep(uReflectionBlendLowerBound, uReflectionBlendUpperBound, smoothness);
     vec3 indirectSpecular = mix(indirectSpecularResult.rgb, indirectGeometryResult.rgb * 1.5, blendFactor); // blends between specular highlight and reflection, bit of a hack
+    if (smoothness < 0.3) // specular - smoothness cuttoff
+	indirectSpecular = vec3(0);  
 
     // calculate resulting fragment
     vec3 diffuseGI = kD * albedo * indirectDiffuse;
