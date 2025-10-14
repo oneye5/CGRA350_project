@@ -315,9 +315,7 @@ void Application::renderGUI() {
 		plantManager.update_plants(inputs);
 	};
 	if (ImGui::Button("GROW")) {
-		for (auto& plant : plantManager.plants) {
-			plant.second.grow();
-		}
+		plantManager.grow();
 	}
 	ImGui::Separator();
 

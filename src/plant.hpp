@@ -44,7 +44,7 @@ namespace plant {
 		Mesh canopy;
 
 		Plant(std::string seed, GLuint trunk_shader, GLuint canopy_shader, lsystem::ruleset ruleset, int steps = 0);
-		Plant(PlantData data, int steps = 4);
+		Plant(PlantData data, int steps = 2);
 		void grow(int steps = 1);
 	};
 
@@ -60,13 +60,14 @@ namespace plant {
 	// std::vector<Plant> create_plants(std::vector<create_plants_input> inputs);
 
 	class PlantManager {
+		std::vector<std::pair<unsigned int, Plant>> plants;
 		Renderer *renderer;
 
 		public:
-		std::vector<std::pair<unsigned int, Plant>> plants;
 		PlantManager();
 		PlantManager(Renderer* renderer);
 
+		void grow(int step = 1);
 		void clear();
 		void update_plants(std::vector<plants_manager_input> inputs);
 	};

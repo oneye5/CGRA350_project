@@ -183,3 +183,9 @@ void PlantManager::update_plants(std::vector<plants_manager_input> inputs) {
 		base += 2;
 	}
 }
+
+void PlantManager::grow(int step) {
+	for (auto& plant : plants) {
+		plant.second.grow(step);
+	}
+}
