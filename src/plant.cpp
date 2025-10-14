@@ -2,6 +2,7 @@
 #include "cgra/cgra_mesh.hpp"
 #include "lsystem.hpp"
 #include "opengl.hpp"
+#include <ostream>
 #include <string>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
@@ -188,4 +189,9 @@ void PlantManager::grow(int step) {
 	for (auto& plant : plants) {
 		plant.second.grow(step);
 	}
+}
+std::ostream& operator<<(std::ostream& os, plants_manager_input const& m) {
+	return os << "PM_Input["
+		<< "pos=(" << m.pos.x <<", " << m.pos.y << ", " << m.pos.z << ")"
+		<<"]";
 }

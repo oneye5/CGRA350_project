@@ -4,6 +4,7 @@
 #include "Noise.hpp"
 #include "renderable.hpp"
 #include "WaterPlane.hpp"
+#include "plant.hpp"
 #include "cgra/cgra_mesh.hpp"
 
 namespace Terrain {
@@ -92,7 +93,7 @@ namespace Terrain {
 		// TODO - obviously implement the sending to the plant manager thing
 		void calculateAndSendTreePlacements(int seed = -1);
 		// Basic function to send a vector of tree positions to the tree manager, send empty to prevent trees maybe
-		void sendTreePlacements(std::vector<glm::vec3> &positions);
+		void sendTreePlacements(std::vector<plant::plants_manager_input> &positions);
 
 	private:
 		// Load the textures for the terrain and store them in the fields

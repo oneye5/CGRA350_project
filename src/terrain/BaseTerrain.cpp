@@ -266,7 +266,7 @@ void BaseTerrain::calculateAndSendTreePlacements(const int seed) {
 	std::mt19937 rng = (seed == -1) ? std::mt19937(std::random_device()()) : std::mt19937(seed);
 	std::uniform_real_distribution<float> uniform_dist(0.0f, 1.0f); // Calculate between 0 and 1 and map to actual position
 
-	std::vector<vec3> positions;
+	std::vector<plant::plants_manager_input> positions;
 	positions.reserve(tree_settings.max_trees); // Might not manage to use max trees but hopefully should get somewhere there
 
 	for (int i = 0; i < tree_settings.placement_attempts && positions.size() < tree_settings.max_trees; i++) {
@@ -277,8 +277,8 @@ void BaseTerrain::calculateAndSendTreePlacements(const int seed) {
 
 		// Check that new position doesn't collide with existing
 		bool valid = true;
-		for (const vec3& p: positions) {
-			float dist = glm::distance(new_pos, p);
+		for (const plant::plants_manager_input& p: positions) {
+			float dist = glm::distance(new_pos, p.pos);
 			if (dist < tree_settings.min_distance) {
 				valid = false;
 				break;
@@ -286,7 +286,7 @@ void BaseTerrain::calculateAndSendTreePlacements(const int seed) {
 		}
 
 		if (valid) {
-			positions.push_back(new_pos);
+			positions.push_back({new_pos});
 			//std::print("{},{},{}\n", new_pos.x, new_pos.y, new_pos.z);
 		}
 	}
@@ -319,9 +319,10 @@ float BaseTerrain::approximateYAtPoint(const vec2 &pos) {
 }
 
 // TODO - implement
-void BaseTerrain::sendTreePlacements(std::vector<vec3> &positions) {
+void BaseTerrain::sendTreePlacements(std::vector<plant::plants_manager_input> &positions) {
 	// Just print the stuff for now :p
 	for (auto& p: positions) {
-		std::print("{:.10f},  {:.10f},  {:.10f}\n", p.x, p.y, p.z);
+		std::cout << p << std::endl;
+		// std::print("{:.10f},  {:.10f},  {:.10f}\n", p.pos.x, p.pos.y, p.pos.z);
 	}
 }

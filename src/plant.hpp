@@ -55,6 +55,12 @@ namespace plant {
 
 	struct plants_manager_input {
 		glm::vec3 pos;
+
+		friend std::ostream& operator<<(std::ostream& os, plants_manager_input const& m) {
+			return os << "PM_Input["
+				<< "pos=(" << m.pos.x <<", " << m.pos.y << ", " << m.pos.z << ")"
+				<<"]";
+		}
 	};
 
 	// std::vector<Plant> create_plants(std::vector<create_plants_input> inputs);
