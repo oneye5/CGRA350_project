@@ -173,7 +173,9 @@ void PlantManager::update_plants(std::vector<plants_manager_input> inputs) {
 		temp_plants.push_back(p);
 	}
 
+	// This is really unsafe but lol
 	auto base = renderer->renderables.size();
+	plants.reserve(temp_plants.size());
 	for (auto plant : temp_plants) {
 		plants.push_back({base, plant});
 		renderer->addRenderable(&plants.back().second.canopy);
