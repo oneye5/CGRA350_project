@@ -178,7 +178,10 @@ void BaseTerrain::renderUI() {
 	ImGui::Text("Tree Placement Controls");
 	// TODO - maybe add some kind of like "auto update flag" to auto calculate new positions and send them to the tree object
 	ImGui::SliderFloat("Minimum distance apart", &tree_settings.min_distance, 0.05f, 20.0f);
-	ImGui::SliderInt("Max tree amount", &tree_settings.max_trees, 1, 3);
+	if (ImGui::InputInt("Max tree amount", &tree_settings.max_trees)) {
+		// No negative numbers
+		tree_settings.max_trees *= tree_settings.max_trees > 0;
+	};
 	ImGui::SliderInt("Max Placement Attempts", &tree_settings.placement_attempts, 1, 200);
 
 	if (ImGui::Button("Calculate tree positions")) {
