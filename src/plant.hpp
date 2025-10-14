@@ -5,6 +5,7 @@
 #include "cgra/cgra_mesh.hpp"
 #include "opengl.hpp"
 #include "renderable.hpp"
+#include "renderer.hpp"
 
 namespace plant {
 	struct Mesh : Renderable {
@@ -43,7 +44,7 @@ namespace plant {
 		Mesh canopy;
 
 		Plant(std::string seed, GLuint trunk_shader, GLuint canopy_shader, lsystem::ruleset ruleset, int steps = 0);
-		Plant(PlantData data, int steps = 4);
+		Plant(PlantData data, int steps = 2);
 		void grow(int steps = 1);
 	};
 
@@ -52,9 +53,22 @@ namespace plant {
 	};
 	extern KnownPlants known_plants;
 
-	struct create_plants_input {
+	struct plants_manager_input {
 		glm::vec3 pos;
 	};
 
-	std::vector<Plant> create_plants(std::vector<create_plants_input> inputs);
+	// std::vector<Plant> create_plants(std::vector<create_plants_input> inputs);
+
+	class PlantManager {
+		std::vector<std::pair<unsigned int, Plant>> plants;
+		Renderer *renderer;
+
+		public:
+		PlantManager();
+		PlantManager(Renderer* renderer);
+
+		void grow(int step = 1);
+		void clear();
+		void update_plants(std::vector<plants_manager_input> inputs);
+	};
 }
