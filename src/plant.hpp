@@ -60,10 +60,10 @@ namespace plant {
 	// std::vector<Plant> create_plants(std::vector<create_plants_input> inputs);
 
 	class PlantManager {
-		std::vector<std::pair<unsigned int, Plant>> plants;
 		Renderer *renderer;
 
 		public:
+		std::vector<std::pair<unsigned int, Plant>> plants;
 		PlantManager();
 		PlantManager(Renderer* renderer);
 

@@ -304,6 +304,21 @@ void Application::renderGUI() {
 	if (ImGui::Checkbox("Plant", &planttt)) {
 		dirtyVoxels = true;
 	}
+	static int plantCount = 1;
+	if (ImGui::InputInt("Plant Num", &plantCount)) {
+		vector<plant::plants_manager_input> inputs;
+		float dist = 2;
+		for (int i = 0; i < plantCount; i++) {
+			inputs.push_back({{dist * (i % 10) - 10, 1, dist * int(i / 10) - 10 }});
+		}
+
+		plantManager.update_plants(inputs);
+	};
+	if (ImGui::Button("GROW")) {
+		for (auto& plant : plantManager.plants) {
+			plant.second.grow();
+		}
+	}
 	ImGui::Separator();
 
 	if (ImGui::Button("Re-voxelize")) { dirtyVoxels = true; }
