@@ -52,7 +52,6 @@ void BaseTerrain::setProjViewUniforms(const glm::mat4 &view, const glm::mat4 &pr
 
 void BaseTerrain::draw() {
 	if (erosion_running) {
-		// TODO - check that running erosion sim here is fine, can do in UI render instead.
 		stepErosion();
 	}
 
@@ -290,11 +289,9 @@ void BaseTerrain::calculateAndSendTreePlacements(const int seed) {
 
 		if (valid) {
 			positions.push_back({new_pos});
-			//std::print("{},{},{}\n", new_pos.x, new_pos.y, new_pos.z);
 		}
 	}
 
-	// TODO - send these to the plant thing
 	sendTreePlacements(positions);
 }
 
@@ -307,7 +304,6 @@ vec3 BaseTerrain::normalizedXZToWorldPos(const vec2 &n_pos) {
 	
 	float y_pos = approximateYAtPoint(n_pos);
 	vec3 pos{world_x, y_pos, world_z};
-	//std::print("{},{},{}\n", pos.x, pos.y, pos.z);
 	return pos;
 }
 
@@ -318,13 +314,11 @@ float BaseTerrain::approximateYAtPoint(const vec2 &pos) {
 
 	const float norm_height = t_noise.heightmap.at(scaled_z * t_noise.width + scaled_x);
 	float height = (norm_height - Y_REDUCTION) * t_settings.model_scale.y * t_settings.amplitude;
-	if (draw_from_min) {height = height - t_settings.min_height;}
+	if (draw_from_min) {height = height - t_noise.min_height;}
 	return height;
 }
 
-// TODO - implement
 void BaseTerrain::sendTreePlacements(std::vector<plant::plants_manager_input> &positions) {
-	// Just print the stuff for now :p
 	for (auto& p: positions) {
 		std::cout << p << std::endl;
 		// std::print("{:.10f},  {:.10f},  {:.10f}\n", p.pos.x, p.pos.y, p.pos.z);
