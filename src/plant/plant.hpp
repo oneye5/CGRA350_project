@@ -6,7 +6,6 @@
 #include "lsystem.hpp"
 #include "cgra/cgra_mesh.hpp"
 #include "opengl.hpp"
-#include "renderable.hpp"
 #include "renderer.hpp"
 #include "plant/mesh.hpp"
 
@@ -21,7 +20,7 @@ namespace plant {
 
 
 	class Plant {
-		// TODO: Store like an rng or something
+		std::minstd_rand rng;
 		lsystem::ruleset ruleset;
 		std::string seed;
 		/** Current representation of the plant as a string */
