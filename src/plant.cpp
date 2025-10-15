@@ -169,6 +169,8 @@ void PlantManager::update_plants(const std::vector<plants_manager_input>& inputs
 
 	for (auto pt : inputs) {
 		Plant p = Plant(known_plants.tree);
+		// Clip into the ground to avoid weird stuff
+		pt.pos -= vec3{0,0.1, 0};
 		p.trunk.modelTransform = translate(p.trunk.modelTransform, pt.pos);
 		p.canopy.modelTransform = translate(p.canopy.modelTransform, pt.pos);
 		temp_plants.push_back(p);
