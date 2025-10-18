@@ -12,7 +12,7 @@
 namespace plant {
 	class Plant {
 		std::minstd_rand rng;
-		std::string current;
+		lsystem::ruleset current;
 		void recalculate_mesh();
 
 		public:

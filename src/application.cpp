@@ -391,12 +391,6 @@ void Application::renderGUI() {
 	ImGui::Begin("Texture preview", 0);
 	ImGui::Image((ImTextureID)(intptr_t)t_terrain->t_noise.texID, ImVec2(tex_prev_size, tex_prev_size));
 	ImGui::End();
-
-	// {{{ LSystem stuff
-	static lsystem::gui::Data ls_data;
-	lsystem::gui::rules_window(ls_data);
-	lsystem::gui::growth_window(ls_data);
-	// }}}
 }
 
 

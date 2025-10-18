@@ -14,26 +14,23 @@
 using namespace plant;
 using namespace glm;
 
-Plant::Plant(std::string seed, GLuint trunk_shader, GLuint canopy_shader, lsystem::ruleset ruleset, int steps) :
-	ruleset{ruleset},
-	seed{seed},
-	current{seed},
+Plant::Plant(lsystem::ruleset current, GLuint trunk_shader, GLuint canopy_shader, unsigned long rng_seed, int steps) :
+	rng{rng_seed},
+	current{current},
 	trunk{trunk_shader},
 	canopy{canopy_shader} {
 	grow(steps);
 }
 
-Plant::Plant(PlantData data, int steps) :
-		ruleset{data.rules},
-		seed{data.seed},
-		current{seed},
+Plant::Plant(data::PlantData data, int steps) :
+		current{data.initial},
 		trunk{data.trunk_shader},
 		canopy{data.canopy_shader} {
 	grow(steps);
 }
 
 void Plant::grow(int steps) {
-	current = lsystem::iterate(current, ruleset, steps);
+	current = lsystem::iterate(current, rng, steps);
 	recalculate_mesh();
 }
 
@@ -54,6 +51,7 @@ void Plant::recalculate_mesh() {
 	};
 	std::vector<float> steps;
 	std::vector<stackItem> stack = {};
+	// lsystemdatastruct;
 	for (const auto &c: current) {
 		switch (c) {
 			case 'A': // To-grow
@@ -140,7 +138,7 @@ void PlantManager::update_plants(const std::vector<plants_manager_input>& inputs
 	std::vector<Plant> temp_plants;
 
 	for (auto pt : inputs) {
-		Plant p = Plant(known_plants.tree);
+		Plant p = Plant(data::known_plants.tree);
 		// Clip into the ground to avoid weird stuff
 		pt.pos -= vec3{0,0.1, 0};
 		p.trunk.modelTransform = translate(p.trunk.modelTransform, pt.pos);
