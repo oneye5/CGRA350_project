@@ -1,17 +1,18 @@
 #pragma once
-#include "plant/node/node.hpp"
+#include "node.hpp"
+#include "lsystem/node/node.hpp"
 
-namespace plant::node::common {
+namespace lsystem::node::common {
 	class Push : public Node {
 		public:
-		virtual void render(std::vector<glm::mat4> stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const override;
+		virtual void render(std::vector<node_stack> stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const override;
 		virtual ~Push();
 	};
 	extern const Push *push;
 
 	class Pop : public Node {
 		public:
-		virtual void render(std::vector<glm::mat4> stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const override;
+		virtual void render(std::vector<node_stack> stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const override;
 		virtual ~Pop();
 	};
 	extern const Pop *pop;
@@ -21,14 +22,14 @@ namespace plant::node::common {
 		public:
 		Translate(glm::vec3 dist);
 
-		virtual void render(std::vector<glm::mat4> stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const override;
+		virtual void render(std::vector<node_stack> stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const override;
 		virtual ~Translate();
 	};
 
 	class TrunkVertex : public Node {
 		public:
 
-		virtual void render(std::vector<glm::mat4> stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const override;
+		virtual void render(std::vector<node_stack> stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const override;
 		virtual ~TrunkVertex();
 	};
 	extern const TrunkVertex *trunkVertex;
@@ -36,7 +37,7 @@ namespace plant::node::common {
 	class CanopyVertex : public Node {
 		public:
 
-		virtual void render(std::vector<glm::mat4> stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const override;
+		virtual void render(std::vector<node_stack> stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const override;
 		virtual ~CanopyVertex();
 	};
 	extern const CanopyVertex *canopyVertex;

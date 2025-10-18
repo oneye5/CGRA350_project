@@ -1,5 +1,5 @@
-#include "plant/node/node.hpp"
-#include "plant/node/common.hpp"
+#include "lsystem/node/node.hpp"
+#include "lsystem/node/common.hpp"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
@@ -8,15 +8,15 @@
 
 using namespace glm;
 
-namespace plant::node::common {
-	void Push::render(std::vector<mat4> stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const {
+namespace lsystem::node::common {
+	void Push::render(std::vector<node_stack> stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const {
 		(void)trunk, (void)canopy;
 		stack.push_back(stack.back());
 	}
 	Push::~Push() {}
 	const Push *push = new Push();
 
-	void Pop::render(std::vector<mat4> stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const {
+	void Pop::render(std::vector<node_stack> stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const {
 		(void)trunk, (void)canopy;
 		stack.pop_back();
 	}
@@ -24,13 +24,13 @@ namespace plant::node::common {
 	const Pop *pop = new Pop();
 
 	Translate::Translate(vec3 dist) : dist{dist} {}
-	void Translate::render(std::vector<mat4> stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const {
+	void Translate::render(std::vector<node_stack> stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const {
 		(void)trunk, (void)canopy;
 		stack.back() = translate(stack.back(), dist);
 	}
 	Translate::~Translate() {}
 
-	void TrunkVertex::render(std::vector<mat4> stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const {
+	void TrunkVertex::render(std::vector<node_stack> stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const {
 		(void)trunk, (void)canopy;
 		// TODO: Normals: translate by one then see where that leaves us as the normal?
 		trunk.push_index(trunk.push_vertex({stack.back() * vec4{0,0,0,1}}));
@@ -38,7 +38,7 @@ namespace plant::node::common {
 	TrunkVertex::~TrunkVertex() {}
 	const TrunkVertex *trunkVertex = new TrunkVertex();
 
-	void CanopyVertex::render(std::vector<mat4> stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const {
+	void CanopyVertex::render(std::vector<node_stack> stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const {
 		(void)trunk, (void)canopy;
 		// TODO: Normals: translate by one then see where that leaves us as the normal?
 		canopy.push_index(trunk.push_vertex({stack.back() * vec4{0,0,0,1}}));
