@@ -3,12 +3,12 @@ The project may not work on intel / AMD GPU's or any GPU's that have less than 2
 
 # IMGUI controls:
 ## Renderer settings:
-Re-voxelize:	Updates the voxel representation of the scene, should be done after any geometry changes. \t
-Light pos: 	Position of primary light source. Voxelization needs to occur for changes to be reflected. \t
-Light scale: 	Scale of primary light source, higher scales result in a brighter scene. Voxelization needs to occur for changes to be reflected. \t
-Light color:	The color of the light emitted from the primary light source. Voxelization needs to occur for changes to be reflected.
-Light brightness: The emission strength of the primary light source. Voxelization needs to occur for changes to be reflected.
-Ambient RGB:	The ambient color. Color is added based on AO. 
+Re-voxelize:	Updates the voxel representation of the scene, should be done after any geometry changes.<br>
+Light pos: 	Position of primary light source. Voxelization needs to occur for changes to be reflected.<br> 
+Light scale: 	Scale of primary light source, higher scales result in a brighter scene. Voxelization needs to occur for changes to be reflected.<br>
+Light color:	The color of the light emitted from the primary light source. Voxelization needs to occur for changes to be reflected.<br>
+Light brightness: The emission strength of the primary light source. Voxelization needs to occur for changes to be reflected.<br>
+Ambient RGB:	The ambient color. Color is added based on AO.
 Diffuse brightness multiplier:	Multiplies the light received from surfaces, can be used to weak how bright the scene appears.
 AO multiplier:	Amplifies the AO term.
 Contrast:	Changes the contrast of each fragment.
