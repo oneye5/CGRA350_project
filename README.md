@@ -131,26 +131,3 @@ Once you're setup, you can build your project with Xcode, but have to execute yo
 $ ./build/bin/base [args..]
 ```
 
-
-
-# CGRA Library
-
-In addition to the math library and other external libraries, this project provides some simple classes and functions (in the `cgra` namespace) to get started with a graphics application. Further description and documentation can be found in the respective headers.
-
-| File | Description |
-|:----:|:------------|
-| `cgra_geometry.hpp` | Utility functions for drawing basic geometry like spheres |
-| `cgra_gui.hpp` | Provides methods for setting up and rendering ImGui  |
-| `cgra_image.hpp` | An image class that can loaded from and saved to a file |
-| `cgra_mesh.hpp` | Mesh builder class for simple position/normal/uvs meshes |
-| `cgra_shader.hpp` | Shader builder class for compiling shaders from files or strings |
-| `cgra_wavefront.hpp` | Minimum viable wavefront asset loader function that returns a `mesh_builder` |
-
-In particular, the `rgba_image`, `shader_builder`, and `mesh_builder` classes are designed to hold data on the CPU and provide a way to upload this data to OpenGL. They are not responsible for deallocating these objects.
-
-# etc
-
-- If you add new source files, put them in \/src, and they would be added to the project automatically based on their extension.
-- In VS, for example, don't forget to change the build type to debug (for debugging) or release (fast execution) as needed.
-- When submitting your work, only submit your work directory--don't submit the build directory.
-
