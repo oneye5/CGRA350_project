@@ -23,6 +23,5 @@ namespace lsystem::node::tree {
 
 	void Branch::render(std::vector<node_stack> &stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const {
 	}
-	Branch::Branch() : Node{} {}
 	Branch::~Branch() {}
 }
