@@ -1,8 +1,14 @@
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/transform.hpp>
+
 #include "lsystem/node/node.hpp"
 #include "lsystem/node/common.hpp"
 #include "lsystem/node/tree.hpp"
 
 using namespace lsystem::node::common;
+using namespace glm;
 
 namespace lsystem::node::tree {
 	std::shared_ptr<const Branch> branch = std::make_shared<Branch>();
@@ -26,9 +32,24 @@ namespace lsystem::node::tree {
 	}
 
 	void Leaf::render(std::vector<node_stack> &stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const {
-
+		(void)trunk;
+		vec4 a = stack.back().trans * vec4{0,0,0,1};
+		stack.back().trans = translate(stack.back().trans, vec3{0, stack.back().size/2.0, 0});
+		vec4 b = stack.back().trans * vec4{0,0,0,1};
+		vec4 norm = normalize(b-a);
+		canopy.push_index(canopy.push_vertex({a, vec3{norm}}));
+		stack.back().size *= 0.8;
 	}
 
 	void Branch::render(std::vector<node_stack> &stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const {
+		(void)canopy;
+		trunk.push_index(trunk.push_vertex({{stack.back().trans * vec4{0,0,0,1}}, {0,0,1}}));
+		stack.back().trans = translate(stack.back().trans, vec3{0, stack.back().size, 0});
+		trunk.push_index(trunk.push_vertex({{stack.back().trans * vec4{0,0,0,1}}, {0,0,1}}));
+		stack.back().steps->push_back(stack.back().step);
+		stack.back().step += 1;
+		stack.back().steps->push_back(stack.back().step);
+
+		stack.back().size *= 0.8;
 	}
 }
