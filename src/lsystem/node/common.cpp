@@ -27,10 +27,16 @@ namespace lsystem::node::common {
 	Rotate<axis>::Rotate(float angle) : angle{angle} {}
 
 	template<glm::vec3 axis>
+	Rotate<axis>::~Rotate() {}
+
+	template<glm::vec3 axis>
 	void Rotate<axis>::render(std::vector<node_stack> &stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const {
 		(void)trunk, (void)canopy;
 		stack.back().trans = rotate(stack.back().trans, this->angle, axis);
 	}
+
+	RotateX::RotateX(float angle) : Rotate<vec3{1,0,0}>(angle) {};
+	RotateX::~RotateX() {};
 
 	Translate::Translate(vec3 dist) : dist{dist} {}
 	void Translate::render(std::vector<node_stack> &stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const {

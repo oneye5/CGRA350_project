@@ -12,6 +12,7 @@ namespace lsystem::node {
 	};
 	class Node {
 		public:
+		Node();
 		virtual ~Node();
 
 		virtual std::vector<const Node*> grow(std::minstd_rand &rng) const;
