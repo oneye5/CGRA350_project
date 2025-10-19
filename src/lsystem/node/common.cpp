@@ -35,8 +35,13 @@ namespace lsystem::node::common {
 		stack.back().trans = rotate(stack.back().trans, this->angle, axis);
 	}
 
-	RotateX::RotateX(float angle) : Rotate<vec3{1,0,0}>(angle) {};
-	RotateX::~RotateX() {};
+	//  From https://stackoverflow.com/a/8752879
+	template class Rotate<glm::vec3{1,0,0}>;  // RotateX
+	template class Rotate<glm::vec3{0,1,0}>;  // RotateY
+	template class Rotate<glm::vec3{0,0,1}>;  // RotateZ
+
+	// RotateX::RotateX(float angle) : Rotate<vec3{1,0,0}>(angle) {};
+	// RotateX::~RotateX() {};
 
 	Translate::Translate(vec3 dist) : dist{dist} {}
 	void Translate::render(std::vector<node_stack> &stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const {

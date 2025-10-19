@@ -9,8 +9,6 @@ namespace lsystem::node::tree {
 	std::shared_ptr<const Leaf> leaf = std::make_shared<Leaf>();
 
 	Branch::~Branch() {}
-	void Branch::render(std::vector<node_stack> &stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const {
-	}
 
 	Leaf::~Leaf() {}
 	std::vector<std::shared_ptr<const Node>> Leaf::grow(std::shared_ptr<const Node> self, std::minstd_rand& rng) const {
@@ -26,7 +24,11 @@ namespace lsystem::node::tree {
 		ret.push_back(pop);                                        // ]
 		return ret;
 	}
+
 	void Leaf::render(std::vector<node_stack> &stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const {
 
+	}
+
+	void Branch::render(std::vector<node_stack> &stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const {
 	}
 }

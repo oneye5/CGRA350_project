@@ -35,11 +35,9 @@ namespace lsystem::node::common {
 		virtual ~Rotate();
 
 	};
-	class RotateX : public Rotate<glm::vec3{1,0,0}> {
-		public:
-		RotateX(float angle);
-		virtual ~RotateX();
-	};
+	using RotateX = Rotate<glm::vec3{1,0,0}>;
+	using RotateY = Rotate<glm::vec3{0,1,0}>;
+	using RotateZ = Rotate<glm::vec3{0,0,1}>;
 
 	class TrunkVertex : public Node {
 		public:
