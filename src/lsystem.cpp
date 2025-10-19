@@ -10,12 +10,8 @@ lsystem::ruleset lsystem::iterate(const lsystem::ruleset &current, std::minstd_r
 	lsystem::ruleset cur;
 	for (int i = 0; i < count; i++) {
 		for (const auto& n : prev) {
-			auto vec = n->grow(rng);
+			auto vec = n->grow(n, rng);
 			cur.insert(cur.end(), vec.begin(), vec.end());
-		}
-
-		for (const auto &n : prev) {
-			delete n;
 		}
 
 		prev = cur;

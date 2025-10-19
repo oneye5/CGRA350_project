@@ -14,14 +14,14 @@ namespace lsystem::node::common {
 		stack.push_back(stack.back());
 	}
 	Push::~Push() {}
-	const Push *push = new Push();
+	std::shared_ptr<const Push> push = std::make_shared<Push>();
 
 	void Pop::render(std::vector<node_stack> &stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const {
 		(void)trunk, (void)canopy;
 		stack.pop_back();
 	}
 	Pop::~Pop() {}
-	const Pop *pop = new Pop();
+	std::shared_ptr<const Pop> pop = std::make_shared<Pop>();
 
 	template<glm::vec3 axis>
 	Rotate<axis>::Rotate(float angle) : angle{angle} {}
@@ -51,7 +51,7 @@ namespace lsystem::node::common {
 		trunk.push_index(trunk.push_vertex({vec3{stack.back().trans * vec4{0,0,0,1}} }));
 	}
 	TrunkVertex::~TrunkVertex() {}
-	const TrunkVertex *trunkVertex = new TrunkVertex();
+	std::shared_ptr<const TrunkVertex> trunkVertex = std::make_shared<TrunkVertex>();
 
 	void CanopyVertex::render(std::vector<node_stack> &stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const {
 		(void)trunk, (void)canopy;
@@ -59,5 +59,5 @@ namespace lsystem::node::common {
 		canopy.push_index(trunk.push_vertex({vec3{stack.back().trans * vec4{0,0,0,1}}}));
 	}
 	CanopyVertex::~CanopyVertex() {}
-	const CanopyVertex *canopyVertex = new CanopyVertex();
+	std::shared_ptr<const CanopyVertex> canopyVertex = std::make_shared<CanopyVertex>();
 }

@@ -8,14 +8,14 @@ namespace lsystem::node::common {
 		virtual void render(std::vector<node_stack> &stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const override;
 		virtual ~Push();
 	};
-	extern const Push *push;
+	extern std::shared_ptr<const Push> push;
 
 	class Pop : public Node {
 		public:
 		virtual void render(std::vector<node_stack> &stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const override;
 		virtual ~Pop();
 	};
-	extern const Pop *pop;
+	extern std::shared_ptr<const Pop> pop;
 
 	class Translate : public Node {
 		glm::vec3 dist;
@@ -47,7 +47,7 @@ namespace lsystem::node::common {
 		virtual void render(std::vector<node_stack> &stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const override;
 		virtual ~TrunkVertex();
 	};
-	extern const TrunkVertex *trunkVertex;
+	extern std::shared_ptr<const TrunkVertex> trunkVertex;
 
 	class CanopyVertex : public Node {
 		public:
@@ -55,5 +55,5 @@ namespace lsystem::node::common {
 		virtual void render(std::vector<node_stack> &stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const override;
 		virtual ~CanopyVertex();
 	};
-	extern const CanopyVertex *canopyVertex;
+	extern std::shared_ptr<const CanopyVertex> canopyVertex;
 }

@@ -2,6 +2,7 @@
 
 #include "cgra/cgra_mesh.hpp"
 #include <random>
+#include <memory>
 
 namespace lsystem::node {
 	struct node_stack {
@@ -15,7 +16,7 @@ namespace lsystem::node {
 		Node();
 		virtual ~Node();
 
-		virtual std::vector<const Node*> grow(std::minstd_rand &rng) const;
+		virtual std::vector<std::shared_ptr<const Node>> grow(std::shared_ptr<const Node> self, std::minstd_rand &rng) const;
 
 		virtual void render(std::vector<node_stack> &stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const = 0;
 	};
