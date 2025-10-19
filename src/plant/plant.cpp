@@ -45,8 +45,11 @@ void Plant::recalculate_mesh() {
 	float size = 1;
 	mat4 trans = mat4(1);
 	std::vector<float> steps;
-	std::vector<stackItem> stack = {};
-	// lsystemdatastruct;
+	std::vector<lsystem::node::node_stack> stack = {{trans, size, step, &steps}};
+
+	for (auto &n: current) {
+		n->render(stack, trunk_mb, canopy_mb);
+	}
 
 	trunk.mesh = trunk_mb.build();
 	canopy.mesh = canopy_mb.build();
