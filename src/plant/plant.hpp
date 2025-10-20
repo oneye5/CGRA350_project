@@ -26,6 +26,7 @@ namespace plant {
 
 	struct plants_manager_input {
 		glm::vec3 pos;
+		int type;
 
 		friend std::ostream& operator<<(std::ostream& os, plants_manager_input const& m) {
 			return os << "PM_Input["

@@ -102,7 +102,7 @@ void loadScene0() {
 
 	// Create some debug plants
 	// ({ {{0,1,0}} });
-	plantManager.update_plants({{{0,1,0}}});
+	plantManager.update_plants({{{0,1.5,0}, 1}});
 
 
 	// renderer tweaks based on scene size

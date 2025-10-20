@@ -81,7 +81,16 @@ void PlantManager::update_plants(const std::vector<plants_manager_input>& inputs
 	std::vector<Plant> temp_plants;
 
 	for (auto pt : inputs) {
-		Plant p = Plant(data::known_plants.tree);
+		data::PlantData *data;
+		switch (pt.type) {
+			case 0:
+				// TODO: Random/log
+			case 1:
+				// Tree
+				data = &data::known_plants.tree;
+				break;
+		}
+		Plant p = Plant(*data);
 		// Clip into the ground to avoid weird stuff
 		pt.pos -= vec3{0,0.1, 0};
 		p.trunk.modelTransform = translate(p.trunk.modelTransform, pt.pos);
