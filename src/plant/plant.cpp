@@ -52,6 +52,11 @@ void Plant::recalculate_mesh() {
 	}
 
 	trunk.mesh = trunk_mb.build();
+
+	if (canopy_mb.vertices.size() <= 0) {
+		canopy_mb.push_index(canopy_mb.push_vertex({{0,-10000,0}}));
+	}
+
 	canopy.mesh = canopy_mb.build();
 
 	glGenBuffers(1, &trunk.alt_vbo);
