@@ -54,6 +54,19 @@ This project also requires OpenGL v3.3 and a suitable C++11 compiler.
 
 #### Command Line
 
+The **best** way to run this program is by using the makefile. Run
+
+```sh
+make build compile DEBUG=0
+```
+
+to compile in release mode. Then to open the program run
+
+```sh
+build/bin/base
+```
+
+
 The simpliest way to set up a basic project is to run the shell script `runcmake.sh` (`runcmake.bat` for Windows) which runs the `cmake`, `make` and run commands for you.
 ```sh
 $ ./runcmake.sh
