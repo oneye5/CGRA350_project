@@ -1,5 +1,5 @@
 # IMPORTANT NOTE
-The project may not work on intel / AMD GPU's or any GPU's that have less than 2gb of VRAM. The program is tested to work on mid/low end NVDIA GPU's.
+The project may not work on intel / AMD GPU's or any GPU's that have less than 2gb of VRAM. The program is tested to work on mid/low end NVDIA GPU's. Build process remains mostly the same as the CGRA framework, instructions on this are below.
 
 # General controls 
 Wasd + space + ctrl for camera movement. <br>
