@@ -41,8 +41,6 @@ Voxel show X as RGB:	When using voxel debug mode, renders fragments using X as t
 # How to run
 The project can be built and run the same way as the CGRA framework, the readme from which is pasted below:
 
-# CGRA OpenGL Base Project
-
 # Requirements
 
 The project requires [CMake](https://cmake.org/) to build before compiling. The recommended way to build to project is to create a build folder then using CMake to create to project inside it. Make sure that you are creating the build folder in the same directory as the work folder.
@@ -50,9 +48,7 @@ The project requires [CMake](https://cmake.org/) to build before compiling. The 
 $ mkdir build
 ```
 
-This project also requires OpenGL v3.3 and a suitable C++11 compiler.
-
-
+This project also requires OpenGL v4.4 and a suitable C++23 compiler.
 
 ## Linux
 
@@ -93,7 +89,7 @@ $ ./build/bin/base [args...]
 Setting up for [Eclipse](https://eclipse.org/) is a little more complicated. Navigate to the build folder and run `cmake` for Eclipse.
 ```sh
 $ cd build
-$ cmake  -G "Eclipse  CDT4 - Unix  Makefiles" ../work
+$ cmake  -G "Eclipse  CDT4 - Unix  Makefiles" 
 ```
 Start Eclipse and go to `File > Import > Existing Projects into Workspace`, browse to and select the `build/` directory as the project. Make sure  the  box `Copy  Projects into Workspace` is unchecked. Once you've imported the project, and are unable run it, do the following:
  - Go to `Run > Run  Configurations`.  On the left side, select C/C++  Application, then in the `Main` tab, make sure your C/C++ Application field contains `./bin/base` and that `Enable auto build` is checked.
@@ -115,12 +111,12 @@ This project requires at least Visual Studio 2017. You can get the latest, [Visu
 
 Run the `cmake` command for Visual Studio with the appropriate version number (XX).
 ```sh
-> cmake -G "Visual Studio XX" ..\work
+> cmake -G "Visual Studio XX" 
 ```
 
 Or if you are building for 64-bit systems.
 ```sh
-> cmake -G "Visual Studio XX Win64" ..\work
+> cmake -G "Visual Studio XX Win64" 
 ```
 
 After opening the solution (`.sln`) you will need to set some additional variables before running.
@@ -139,7 +135,7 @@ After opening the solution (`.sln`) you will need to set some additional variabl
 [Xcode](https://developer.apple.com/xcode/) is an IDE that offers a little more than simple text editing. The setup again is very similar to Eclipse.
 ```sh
 $ cd build
-$ cmake -G "Xcode" ../work
+$ cmake -G "Xcode" 
 $ cd ..
 ```
 
