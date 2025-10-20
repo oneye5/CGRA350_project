@@ -17,7 +17,11 @@ layout(location = 3) out vec4 gEmissive; // emissive.rgb + spare channel
 
 in vec3 worldPos;
 in vec3 normal; // must be world space
+in vec2 uvCoord;
 out vec4 fragColor;
+
+uniform sampler2D colourTexture;
+uniform sampler2D normalTexture;
 
 struct MaterialData {
     vec3 pos, nrm, alb, emi; // world position, world normal, albedo, emissive color
@@ -59,7 +63,7 @@ void main() {
     MaterialData m;
     m.pos = worldPos;
     m.nrm = normal;
-    m.alb = vec3(0.2,1.0,0.2);
+    m.alb = texture2D(colourTexture, uvCoord).rgb;
     m.emi = vec3(0.0);		
     m.mtl = 0.0;		// 0 for non-metalic surfaces
     m.smoothness = 0.15;	// can be thought of as shinyness, eg concrete has a low value
