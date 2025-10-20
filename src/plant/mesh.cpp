@@ -11,7 +11,7 @@ bool planttt = true;
 
 Mesh::Mesh() : mesh{}, shader{0}, modelTransform{1} {}
 
-Mesh::Mesh(GLuint shader) : mesh{}, shader{shader}, modelTransform{1} {}
+Mesh::Mesh(GLuint shader, GLuint colour, GLuint normal) : mesh{}, shader{shader}, modelTransform{1}, colour_texture{colour}, normal_texture{normal} {}
 
 GLuint Mesh::getShader() {
 	return shader;

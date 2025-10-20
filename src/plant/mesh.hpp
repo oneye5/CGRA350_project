@@ -7,9 +7,11 @@ namespace plant {
 		GLuint shader;
 		glm::mat4 modelTransform;
 		GLuint alt_vbo;
+		GLuint colour_texture;
+		GLuint normal_texture;
 
 		Mesh();
-		Mesh(GLuint shader);
+		Mesh(GLuint shader, GLuint colour, GLuint normal);
 
 		virtual void draw() override;
 		virtual void setProjViewUniforms(const glm::mat4& view, const glm::mat4& proj) const override;

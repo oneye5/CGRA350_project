@@ -17,15 +17,15 @@ using namespace glm;
 Plant::Plant(lsystem::ruleset current, GLuint trunk_shader, GLuint canopy_shader, unsigned long rng_seed, int steps) :
 	rng{rng_seed},
 	current{current},
-	trunk{trunk_shader},
-	canopy{canopy_shader} {
+	trunk{trunk_shader, 0, 0},
+	canopy{canopy_shader, 0, 0} {
 	grow(steps);
 }
 
 Plant::Plant(data::PlantData data, int steps) :
 		current{data.initial},
-		trunk{data.trunk_shader},
-		canopy{data.canopy_shader} {
+		trunk{data.trunk_shader, data.trunk_texture_colour, data.trunk_texture_normal},
+		canopy{data.canopy_shader, data.canopy_texture_colour, data.canopy_texture_normal} {
 	grow(steps);
 }
 
