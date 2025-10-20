@@ -11,10 +11,10 @@ run:
 
 build:
 	mkdir -p build
-	cmake3 -B build . -G Ninja $(CMAKE_FLAGS)
+	cmake3 -B build . $(CMAKE_FLAGS)
 
 compile:
-	ninja -C build
+	make -C build
 
 clean:
 	rm -r build
