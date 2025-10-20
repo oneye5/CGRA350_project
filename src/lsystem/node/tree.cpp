@@ -20,6 +20,10 @@ namespace lsystem::node::tree {
 	std::vector<std::shared_ptr<const Node>> Leaf::grow(std::shared_ptr<const Node> self, std::minstd_rand& rng) const {
 		std::vector<std::shared_ptr<const Node>> ret;
 		ret.push_back(branch);                                      // F
+		ret.push_back(push);
+		ret.push_back(std::make_shared<RotateY>(0.0, 0.4));              // ???
+		ret.push_back(leaf);
+		ret.push_back(pop);
 
 		ret.push_back(push);                                        // [
 		ret.push_back(std::make_shared<RotateX>(0.3));              // +

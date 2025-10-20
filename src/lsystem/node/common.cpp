@@ -24,10 +24,20 @@ namespace lsystem::node::common {
 	std::shared_ptr<const Pop> pop = std::make_shared<Pop>();
 
 	template<glm::vec3 axis>
-	Rotate<axis>::Rotate(float angle) : angle{angle} {}
+	Rotate<axis>::Rotate(float angle) : og_angle{angle}, angle{angle} {}
+	template<glm::vec3 axis>
+	Rotate<axis>::Rotate(float angle, float variance) : og_angle{angle}, angle{angle}, variance{variance} {}
+	template<glm::vec3 axis>
+	Rotate<axis>::Rotate(float og_angle, float angle, float variance) : og_angle{og_angle}, angle{angle}, variance{variance} {}
 
 	template<glm::vec3 axis>
 	Rotate<axis>::~Rotate() {}
+
+	template<glm::vec3 axis>
+	std::vector<std::shared_ptr<const Node>> Rotate<axis>::grow(std::shared_ptr<const Node> self, std::minstd_rand &rng) const {
+		float new_angle = og_angle + std::generate_canonical<float, 10>(rng) * variance - variance/2;
+		return {std::make_shared<Rotate<axis>>(og_angle, new_angle, variance)};
+	}
 
 	template<glm::vec3 axis>
 	void Rotate<axis>::render(std::vector<node_stack> &stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const {

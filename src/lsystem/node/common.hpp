@@ -28,9 +28,14 @@ namespace lsystem::node::common {
 
 	template<glm::vec3 axis>
 	class Rotate : public Node {
+		float og_angle;
 		float angle;
+		float variance;
 		public:
 		Rotate(float angle);
+		Rotate(float angle, float variance);
+		Rotate(float og_angle, float angle, float variance);
+		virtual std::vector<std::shared_ptr<const Node>> grow(std::shared_ptr<const Node> self, std::minstd_rand &rng) const override;
 		virtual void render(std::vector<node_stack> &stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const override;
 		virtual ~Rotate();
 
