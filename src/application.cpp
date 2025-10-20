@@ -32,6 +32,7 @@ using namespace glm;
 
 
 extern bool planttt ;
+int scene = 0;
 glm::vec3 lightPos;
 glm::vec3 lightScale;
 bool dirtyVoxels = true;
@@ -66,8 +67,10 @@ void resetScene() {
 	renderer->lightingPass->setDefaultParams();
 }
 
+
 void loadScene0() {
 	resetScene();
+	scene = 0;
 	plantManager = plant::PlantManager(renderer);
 
 	t_terrain = new Terrain::BaseTerrain();
@@ -117,6 +120,7 @@ void loadScene0() {
 
 void loadScene1() {
 	resetScene();
+	scene = 1;
 	float roomSize = 2.0f;
 	float wallThickness = roomSize / 20.0f;
 	float wallLen = 0.55;
@@ -197,9 +201,9 @@ void loadScene1() {
 	renderer->lightingPass->params.uHorizonColor = glm::vec3(0, 0, 0.01);
 }
 
-void loadScene2() {
-
-}
+// void loadScene2() {
+//
+// }
 
 Application::Application(GLFWwindow* window) : m_window(window) {
 	int width, height;
@@ -288,28 +292,11 @@ void Application::renderGUI() {
 	// display current camera parameters
 	ImGui::Text("Application %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 	ImGui::Separator();
-	if (ImGui::Checkbox("Plant", &planttt)) {
-		dirtyVoxels = true;
-	}
-	static int plantCount = 1;
-	if (ImGui::InputInt("Plant Num", &plantCount)) {
-		vector<plant::plants_manager_input> inputs;
-		float dist = 2;
-		for (int i = 0; i < plantCount; i++) {
-			inputs.push_back({{dist * (i % 10) - 10, 1, dist * int(i / 10) - 10 }});
-		}
-
-		plantManager.update_plants(inputs);
-	};
-	if (ImGui::Button("GROW")) {
-		plantManager.grow();
-	}
-	ImGui::Separator();
 
 	if (ImGui::Button("Re-voxelize")) { dirtyVoxels = true; }
 	if (ImGui::Button("load scene 0")) { loadScene0(); }
 	if (ImGui::Button("load scene 1")) { loadScene1(); }
-	if (ImGui::Button("load scene 2")) { loadScene2(); }
+	// if (ImGui::Button("load scene 2")) { loadScene2(); }
 
 	ImGui::Separator();
 	if (ImGui::CollapsingHeader("Light settings", ImDrawFlags_Closed)) {
@@ -383,6 +370,16 @@ void Application::renderGUI() {
 
 	// Terrain UI stuff
 	t_terrain->renderUI();
+
+	const auto f = [&]() {
+		if (ImGui::Checkbox("Draw Plants", &planttt)) {
+			dirtyVoxels = true;
+		}
+		if (ImGui::Button("GROW")) {
+			plantManager.grow();
+		}
+	};
+	if (scene == 0) t_terrain->plantUI(f);
 
 	// standalone preview of the noise texture
 	static int tex_prev_size = 256;

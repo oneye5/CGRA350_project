@@ -5,6 +5,7 @@
 #include "renderable.hpp"
 #include "WaterPlane.hpp"
 #include "plant.hpp"
+#include <functional>
 #include "cgra/cgra_mesh.hpp"
 
 namespace Terrain {
@@ -75,6 +76,7 @@ namespace Terrain {
 		bool draw_from_min = true; // Whether or not to get the terrain shader to draw with the min height at y=0
 
 		void renderUI();
+		void plantUI(std::function<void()>f);
 		BaseTerrain();
 		// Regenerate the plane mesh with a specific subdivision count
 		void changePlaneSubdivision(int subs);
