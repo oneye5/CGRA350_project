@@ -1,7 +1,7 @@
 #version 440
 
 layout (points) in;
-layout (triangle_strip, max_vertices = 6) out;
+layout (triangle_strip, max_vertices = 12) out;
 
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
@@ -37,47 +37,71 @@ void main() {
 	vec3 right = normalize(cross(inNormal[0], vec3(0,1,0)));
 	vec3 up = normalize(cross(right, inNormal[0]));
 	vec3 norm = normalize(-cross(right, up));
-	float sc = 0.25;
+	vec3 nDir = -inNormal[0];
+	float sc = 0.05;
 	float dx = 0.0;
 	float dy = 0.0;
+	float dz = 0.0;
 
-	gl_Position = mvp * vec4(pt.xyz + right * sc * dx + up * sc * dy, 1.0); // 0
-	uvCoord = vec2(0.4340277777777778, 0.8796296296296297);
+	dx = -0.1; dy = 0; dz = 0;
+	gl_Position = mvp * vec4(pt.xyz + right * sc * dx + up * sc * dy + nDir * sc * dz, 1.0); // 0
+	uvCoord = vec2(0.5 + dx, 0.5 + dy);
 	worldPos = inWorldPos[0];
 	normal = norm;
 	EmitVertex();
 
-	dx = -0.08796296296296297; dy = 0.10763888888888895;
-	gl_Position = mvp * vec4(pt.xyz + right * sc * dx + up * sc * dy, 1.0); // 5
-	uvCoord = vec2(0.3460648148148148, 0.7719907407407407);
+	dx = 0.1; dy = 0; dz = 0;
+	gl_Position = mvp * vec4(pt.xyz + right * sc * dx + up * sc * dy + nDir * sc * dz, 1.0); // 0
+	uvCoord = vec2(0.5 + dx, 0.5 + dy);
 	worldPos = inWorldPos[0];
 	normal = norm;
 	EmitVertex();
 
-	dx = 0.15625; dy = 0.12037037037037035;
-	gl_Position = mvp * vec4(pt.xyz + right * sc * dx + up * sc * dy, 1.0); // 1
-	uvCoord = vec2(0.5902777777777778, 0.7592592592592593);
+	dx = 0.1; dy = 0.1; dz = 0;
+	gl_Position = mvp * vec4(pt.xyz + right * sc * dx + up * sc * dy + nDir * sc * dz, 1.0); // 0
+	uvCoord = vec2(0.5 + dx, 0.5 + dy);
 	worldPos = inWorldPos[0];
 	normal = norm;
 	EmitVertex();
 
-	dx = -0.10532407407407407; dy = 0.3784722222222222;
-	gl_Position = mvp * vec4(pt.xyz + right * sc * dx + up * sc * dy, 1.0); // 4
-	uvCoord = vec2(0.3287037037037037, 0.5011574074074074);
+	dx = 0.0; dy = 0; dz = -0.1;
+	gl_Position = mvp * vec4(pt.xyz + right * sc * dx + up * sc * dy + nDir * sc * dz, 1.0); // 0
+	uvCoord = vec2(0.5 + dx, 0.5 + dy);
 	worldPos = inWorldPos[0];
 	normal = norm;
 	EmitVertex();
 
-	dx = 0.14120370370370372; dy = 0.4502314814814815;
-	gl_Position = mvp * vec4(pt.xyz + right * sc * dx + up * sc * dy, 1.0); // 2
-	uvCoord = vec2(0.5752314814814815, 0.42939814814814814);
+	dx = 0.0; dy = 0; dz = 0.1;
+	gl_Position = mvp * vec4(pt.xyz + right * sc * dx + up * sc * dy + nDir * sc * dz, 1.0); // 0
+	uvCoord = vec2(0.5 + dx, 0.5 + dy);
 	worldPos = inWorldPos[0];
 	normal = norm;
 	EmitVertex();
 
-	dx = 0.00694444444444442; dy = 0.7337962962962963;
-	gl_Position = mvp * vec4(pt.xyz + right * sc * dx + up * sc * dy, 1.0); // 3
-	uvCoord = vec2(0.4409722222222222, 0.14583333333333334);
+	dx = 0.0; dy = 0.1; dz = 0;
+	gl_Position = mvp * vec4(pt.xyz + right * sc * dx + up * sc * dy + nDir * sc * dz, 1.0); // 0
+	uvCoord = vec2(0.5 + dx, 0.5 + dy);
+	worldPos = inWorldPos[0];
+	normal = norm;
+	EmitVertex();
+
+	dx = 0.2; dy = 0.2; dz = 0.3;
+	gl_Position = mvp * vec4(pt.xyz + right * sc * dx + up * sc * dy + nDir * sc * dz, 1.0); // 0
+	uvCoord = vec2(0.5 + dx, 0.5 + dy);
+	worldPos = inWorldPos[0];
+	normal = norm;
+	EmitVertex();
+
+	dx = 0.2; dy = 0.0; dz = 0.1;
+	gl_Position = mvp * vec4(pt.xyz + right * sc * dx + up * sc * dy + nDir * sc * dz, 1.0); // 0
+	uvCoord = vec2(0.5 + dx, 0.5 + dy);
+	worldPos = inWorldPos[0];
+	normal = norm;
+	EmitVertex();
+
+	dx = 0.2; dy = 0.3; dz = 0.1;
+	gl_Position = mvp * vec4(pt.xyz + right * sc * dx + up * sc * dy + nDir * sc * dz, 1.0); // 0
+	uvCoord = vec2(0.5 + dx, 0.5 + dy);
 	worldPos = inWorldPos[0];
 	normal = norm;
 	EmitVertex();
