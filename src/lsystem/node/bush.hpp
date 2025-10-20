@@ -10,6 +10,7 @@ namespace lsystem::node::bush {
 
 	class Branch : public Node {
 	public:
+		virtual std::vector<std::shared_ptr<const Node>> grow(std::shared_ptr<const Node> self, std::minstd_rand& rng) const override;
 		virtual void render(std::vector<node_stack> &stack, cgra::mesh_builder &trunk, cgra::mesh_builder &canopy) const override;
 		virtual ~Branch();
 	};
