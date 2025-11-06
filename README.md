@@ -1,7 +1,9 @@
-# About
-This is a group project between me and two other students, where my teammates were doing procedural terrain and vegetation, and I was in charge of rendering. To be specific, I implemented a deferred renderer using voxel cone tracing for lighting.
 <img width="1178" height="413" alt="image" src="https://github.com/user-attachments/assets/ef9bcf74-cadd-444e-bbc1-b5418a6d3229" />
 <img width="871" height="876" alt="image" src="https://github.com/user-attachments/assets/43967028-30a1-4e4a-b23c-b1b6286078f3" />
+https://youtu.be/IYnwF6dtijg?si=dyTkm2M_YLJVc_QW
+
+# About
+This is a group project between me and two other students, where my teammates were doing procedural terrain and vegetation, and I was in charge of rendering. To be specific, I implemented a deferred renderer using voxel cone tracing for lighting.
 
 # IMPORTANT NOTE
 The project may not work on Intel / AMD GPU's or any GPU's that have less than 2gb of VRAM. The program is tested to work on mid/low end NVDIA GPU's. Build process remains mostly the same as the CGRA framework, instructions on this are below.
